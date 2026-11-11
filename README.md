@@ -4,6 +4,18 @@ Omawrite is a native Markdown editor for Windows 11 x64. It follows the system t
 
 This fork maintains the Windows port. `omacom/omawrite` is the upstream project and the source for editor updates. Each Windows update identifies the upstream version or commit it is based on. [Upstream Omawrite](https://github.com/omacom/omawrite)
 
+## Screenshots
+
+Omawrite running on Windows 11 with the light and dark system themes.
+
+### Light theme
+
+![Omawrite running on Windows 11 in the light theme](screenshots/OmawriteLight.png)
+
+### Dark theme
+
+![Omawrite running on Windows 11 in the dark theme](screenshots/OmawriteDark.png)
+
 ## Start on Windows
 
 - Run the x64 Setup EXE to install Omawrite for the current user. Use **Settings > Apps > Installed apps** to uninstall it.
