@@ -21,7 +21,7 @@ Omawrite running on Windows 11 with the light and dark system themes.
 - Run the x64 Setup EXE to install Omawrite for the current user. Use **Settings > Apps > Installed apps** to uninstall it.
 - Extract the x64 portable ZIP and run `omawrite.exe` to use the editor directly.
 
-Both packages include the editor and its Qt runtime. Windows can show a reputation warning for the unsigned executables. The signing policy is in `CODE_SIGNING_POLICY.md` in the source repository.
+Both packages include the editor and its Qt runtime. Windows can show a reputation warning for the unsigned executables.
 
 Download published Windows packages from this repository's **Releases** page. Build locally if a release is unavailable.
 
@@ -93,8 +93,10 @@ The font button in the footer picks the writing font from any installed text fon
 
 Use `Ctrl+=`, `Ctrl+-`, or `Ctrl+scroll` to adjust text size from 50% to 300%. Omawrite remembers the size for new windows.
 
-## Licensing and security
+## Licensing
 
-Omawrite is distributed under the MIT License. Bundled Qt libraries and the IBM Plex Mono font have separate licenses. [Third-party notices](THIRD-PARTY-NOTICES.md)
+Omawrite is based on [omacom/omawrite](https://github.com/omacom/omawrite) and distributed under the MIT License. The source license and copyright notice are in `LICENSE`; Windows packages include them as `LICENSE-omawrite.txt`.
 
-The source repository includes `PRIVACY.md` for local document handling and `SECURITY.md` for vulnerability reports.
+Omawrite dynamically links to Qt 6 under the GNU Lesser General Public License version 3. Compatible Qt DLLs can be substituted in the application directory. Windows packages include the LGPL v3 and GPL v3 texts in `licenses/`. See the [Qt source code](https://code.qt.io/cgit/qt/) and [Qt licensing information](https://www.qt.io/licensing/open-source-lgpl-obligations).
+
+The bundled IBM Plex Mono font is copyright IBM Corp. and uses the SIL Open Font License version 1.1. The source license is in `fonts/OFL.txt`; Windows packages include it as `LICENSE-font.txt`.

@@ -185,8 +185,6 @@ Copy-Item -LiteralPath (Join-Path $root "LICENSE") `
     -Destination (Join-Path $packageDirectory "LICENSE-omawrite.txt")
 Copy-Item -LiteralPath (Join-Path $root "fonts\OFL.txt") `
     -Destination (Join-Path $packageDirectory "LICENSE-font.txt")
-Copy-Item -LiteralPath (Join-Path $root "THIRD-PARTY-NOTICES.md") `
-    -Destination $packageDirectory
 Copy-Item -LiteralPath (Join-Path $root "licenses") `
     -Destination $packageDirectory -Recurse
 Copy-Item -LiteralPath (Join-Path $root "README.md") `
