@@ -65,6 +65,17 @@ jobs:
             $versionMatch = Select-String -LiteralPath omawrite.pro `
               -Pattern '^win32: VERSION = (\S+)'
             $expectedVersion = $versionMatch.Matches[0].Groups[1].Value
+            $uninstallKey = Get-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{AE6883F4-1FC1-44FE-BE70-362A97A57B86}_is1'
+            if ($uninstallKey.GetValue("DisplayName") -ne "Omawrite") {
+              throw "The installed app display name must be Omawrite."
+            }
+            if ($uninstallKey.GetValue("Publisher") -ne "Omacom") {
+              throw "The installed app publisher must be Omacom."
+            }
+            $packageVersion = $setups[0].BaseName -replace '^Omawrite-Windows-(.+)-x64-Setup$', '$1'
+            if ($uninstallKey.GetValue("DisplayVersion") -ne $packageVersion) {
+              throw "The installed app version does not match the package version."
+            }
             $version = (& $executable --version | Out-String).Trim()
             if ($LASTEXITCODE -ne 0 -or $version -ne "omawrite $expectedVersion") {
               throw "Unexpected installed version: $version"
@@ -73,7 +84,7 @@ jobs:
             if ($openCommand -ne ('"{0}" "%1"' -f $executable)) {
               throw "The Markdown open command does not target the installed app."
             }
-            $registration = (Get-Item -LiteralPath $registeredApps).GetValue("Omawrite for Windows")
+            $registration = (Get-Item -LiteralPath $registeredApps).GetValue("Omawrite")
             if ($registration -ne "Software\OmawriteWindows\Capabilities") {
               throw "The Windows application registration is missing."
             }
@@ -90,7 +101,7 @@ jobs:
           if ((Test-Path -LiteralPath $executable) -or (Test-Path -LiteralPath $progId)) {
             throw "Uninstall left the executable or Markdown registration installed."
           }
-          if ((Get-Item -LiteralPath $registeredApps).GetValue("Omawrite for Windows")) {
+          if ((Get-Item -LiteralPath $registeredApps).GetValue("Omawrite")) {
             throw "Uninstall left the application registration installed."
           }
           Write-Host "Setup installed, registered, ran, and uninstalled Omawrite."
@@ -161,7 +172,7 @@ jobs:
             $zip.FullName ($zip.FullName + ".sha256") `
             $setup.FullName ($setup.FullName + ".sha256") `
             --repo $env:GITHUB_REPOSITORY `
-            --title "Omawrite for Windows $env:GITHUB_REF_NAME" `
+            --title "Omawrite $env:GITHUB_REF_NAME" `
             @releaseOptions
           if ($LASTEXITCODE -ne 0) {
             throw "GitHub release publication failed with code $LASTEXITCODE."

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = "dev",
+    [string]$Version = "",
     [string]$QtRoot = "",
     [string]$InnoSetupRoot = ""
 )
@@ -9,6 +9,14 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $root = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent))
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    $versionMatches = @(Select-String -LiteralPath (Join-Path $root "omawrite.pro") `
+        -Pattern '^\s*win32:\s*VERSION\s*=\s*(\S+)\s*$')
+    if ($versionMatches.Count -ne 1) {
+        throw "Expected exactly one Windows VERSION in omawrite.pro."
+    }
+    $Version = $versionMatches[0].Matches[0].Groups[1].Value
+}
 $toolsDirectory = Join-Path $root ".tools"
 $qtDirectory = Join-Path $toolsDirectory "Qt"
 $useSuppliedQt = [bool]$QtRoot
@@ -125,16 +133,21 @@ if (-not (Test-Path -LiteralPath $innoCompiler)) {
 }
 
 $vsWhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
-if (-not (Test-Path -LiteralPath $vsWhere)) {
-    throw "Visual Studio Build Tools 2022 with the C++ workload is required."
+$script:vsDevCmd = ""
+if (Test-Path -LiteralPath $vsWhere) {
+    $vsInstall = (& $vsWhere -latest -products * `
+        -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+        -property installationPath | Out-String).Trim()
+    if ($vsInstall) {
+        $script:vsDevCmd = Join-Path $vsInstall "Common7\Tools\VsDevCmd.bat"
+    }
 }
-$vsInstall = (& $vsWhere -latest -products * `
-    -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-    -property installationPath).Trim()
-if (-not $vsInstall) {
-    throw "Visual Studio Build Tools 2022 with the C++ workload is required."
+if (-not $script:vsDevCmd -or -not (Test-Path -LiteralPath $script:vsDevCmd)) {
+    $script:vsDevCmd = Join-Path $toolsDirectory "msvc\setup_x64.bat"
+    if (-not (Test-Path -LiteralPath $script:vsDevCmd)) {
+        throw "Visual Studio Build Tools 2022 with the C++ workload or .tools\msvc\setup_x64.bat is required."
+    }
 }
-$script:vsDevCmd = Join-Path $vsInstall "Common7\Tools\VsDevCmd.bat"
 
 Reset-ChildDirectory -Path $appBuild -ExpectedParent $buildRoot
 $appCommand = 'cd /d "' + $appBuild + '" && "' + $qmake +

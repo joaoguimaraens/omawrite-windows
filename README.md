@@ -1,4 +1,4 @@
-# Omawrite for Windows
+# Omawrite
 
 Omawrite is a native Markdown editor for Windows 11 x64. It follows the system theme and is available as a portable ZIP or a per-user installer.
 
@@ -27,13 +27,13 @@ Download published Windows packages from this repository's **Releases** page. Bu
 
 ## Build on Windows
 
-Install Visual Studio Build Tools 2022 with the C++ workload and run the build from the repository root.
+Install Visual Studio Build Tools 2022 with the C++ workload, or use an existing portable MSVC toolchain at `.tools/msvc/setup_x64.bat`. Run the build from the repository root:
 
 ```powershell
 .\build-windows.cmd
 ```
 
-The script provisions Qt 6.8.3 and Inno Setup as needed, compiles the app, runs the Windows test suite, and writes the portable ZIP and Setup EXE to `dist/`. Find the test log in `.build/windows/tests/results.txt`.
+The script reads the version from `omawrite.pro`, provisions Qt 6.8.3 and Inno Setup as needed, compiles the app, runs the Windows test suite, and writes the portable ZIP and Setup EXE to `dist/`. No arguments are needed. Find the test log in `.build/windows/tests/results.txt`.
 
 ## Upstream updates
 

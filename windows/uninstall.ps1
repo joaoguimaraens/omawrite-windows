@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$registeredAppName = "Omawrite for Windows"
+$registeredAppName = "Omawrite"
 $installDirectory = [IO.Path]::GetFullPath(
     (Join-Path $env:LOCALAPPDATA "Programs\Omawrite")
 )
@@ -83,7 +83,7 @@ if (Test-Path -LiteralPath $registeredApps) {
 }
 
 $shortcutPath = Join-Path $env:APPDATA `
-    "Microsoft\Windows\Start Menu\Programs\Omawrite for Windows.lnk"
+    "Microsoft\Windows\Start Menu\Programs\Omawrite.lnk"
 if (Test-Path -LiteralPath $shortcutPath) {
     Remove-Item -LiteralPath $shortcutPath -Force
 }

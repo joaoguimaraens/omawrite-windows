@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $repository = "joaoguimaraens/omawrite-windows"
-$registeredAppName = "Omawrite for Windows"
+$registeredAppName = "Omawrite"
 $progId = "Omawrite.Markdown"
 $installDirectory = [IO.Path]::GetFullPath(
     (Join-Path $env:LOCALAPPDATA "Programs\Omawrite")
@@ -159,7 +159,7 @@ function Set-InstalledAppRegistration {
     param([Parameter(Mandatory = $true)][string]$Executable)
 
     $startMenuDirectory = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs"
-    $shortcutPath = Join-Path $startMenuDirectory "Omawrite for Windows.lnk"
+    $shortcutPath = Join-Path $startMenuDirectory "Omawrite.lnk"
     $shell = New-Object -ComObject WScript.Shell
     $shortcut = $shell.CreateShortcut($shortcutPath)
     $shortcut.TargetPath = $Executable
@@ -175,7 +175,7 @@ function Set-InstalledAppRegistration {
     New-ItemProperty -LiteralPath $uninstallPath -Name "DisplayIcon" `
         -Value $Executable -PropertyType String -Force | Out-Null
     New-ItemProperty -LiteralPath $uninstallPath -Name "Publisher" `
-        -Value "Omawrite contributors" -PropertyType String -Force | Out-Null
+        -Value "Omacom" -PropertyType String -Force | Out-Null
     New-ItemProperty -LiteralPath $uninstallPath -Name "InstallLocation" `
         -Value $installDirectory -PropertyType String -Force | Out-Null
     New-ItemProperty -LiteralPath $uninstallPath -Name "UninstallString" `
