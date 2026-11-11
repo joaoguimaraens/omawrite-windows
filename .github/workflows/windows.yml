@@ -35,6 +35,62 @@ jobs:
           }
           .\windows\build.ps1 -Version $version
 
+      - name: Verify installation and removal
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $setups = @(Get-ChildItem -LiteralPath dist -Filter *-Setup.exe -File)
+          if ($setups.Count -ne 1) {
+            throw "Expected exactly one Setup EXE, found $($setups.Count)."
+          }
+          $installDirectory = Join-Path $env:LOCALAPPDATA "Programs\Omawrite"
+          $executable = Join-Path $installDirectory "omawrite.exe"
+          $uninstaller = Join-Path $installDirectory "unins000.exe"
+          $progId = "Registry::HKEY_CURRENT_USER\Software\Classes\Omawrite.Markdown"
+          $registeredApps = "Registry::HKEY_CURRENT_USER\Software\RegisteredApplications"
+          if ((Test-Path -LiteralPath $installDirectory) -or (Test-Path -LiteralPath $progId)) {
+            throw "Omawrite is already installed on this runner."
+          }
+          try {
+            $setup = Start-Process -FilePath $setups[0].FullName `
+              -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" `
+              -WindowStyle Hidden -Wait -PassThru
+            if ($setup.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $executable)) {
+              throw "Setup failed with code $($setup.ExitCode)."
+            }
+            $versionMatch = Select-String -LiteralPath omawrite.pro `
+              -Pattern '^win32: VERSION = (\S+)'
+            $expectedVersion = $versionMatch.Matches[0].Groups[1].Value
+            $version = (& $executable --version | Out-String).Trim()
+            if ($LASTEXITCODE -ne 0 -or $version -ne "omawrite $expectedVersion") {
+              throw "Unexpected installed version: $version"
+            }
+            $openCommand = (Get-Item -LiteralPath "$progId\shell\open\command").GetValue("")
+            if ($openCommand -ne ('"{0}" "%1"' -f $executable)) {
+              throw "The Markdown open command does not target the installed app."
+            }
+            $registration = (Get-Item -LiteralPath $registeredApps).GetValue("Omawrite for Windows")
+            if ($registration -ne "Software\OmawriteWindows\Capabilities") {
+              throw "The Windows application registration is missing."
+            }
+          } finally {
+            if (Test-Path -LiteralPath $uninstaller) {
+              $removal = Start-Process -FilePath $uninstaller `
+                -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" `
+                -WindowStyle Hidden -Wait -PassThru
+              if ($removal.ExitCode -ne 0) {
+                throw "Uninstall failed with code $($removal.ExitCode)."
+              }
+            }
+          }
+          if ((Test-Path -LiteralPath $executable) -or (Test-Path -LiteralPath $progId)) {
+            throw "Uninstall left the executable or Markdown registration installed."
+          }
+          if ((Get-Item -LiteralPath $registeredApps).GetValue("Omawrite for Windows")) {
+            throw "Uninstall left the application registration installed."
+          }
+          Write-Host "Setup installed, registered, ran, and uninstalled Omawrite."
+
       - name: Upload Windows package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
