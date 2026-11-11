@@ -22,7 +22,7 @@ Dialog {
         { key: "Ctrl+P", desc: "Print" },
         { key: "Ctrl+Z", desc: "Undo" },
         { key: "Ctrl+Shift+Z / Ctrl+Y", desc: "Redo" },
-        { key: "F11 / Super+F", desc: "Fullscreen" },
+        { key: "F11", desc: "Fullscreen" },
         { key: "Ctrl+F", desc: "Find" },
         { key: "Ctrl+H", desc: "Find & Replace" },
         { key: "Ctrl+G / Enter", desc: "Next Match in Find" },

@@ -8,11 +8,11 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$repository = "AbrarZShahriar/omawrite-windows"
-$registeredAppName = "OmaWrite for Windows"
-$progId = "OmaWrite.Markdown"
+$repository = "joaoguimaraens/omawrite-windows"
+$registeredAppName = "Omawrite for Windows"
+$progId = "Omawrite.Markdown"
 $installDirectory = [IO.Path]::GetFullPath(
-    (Join-Path $env:LOCALAPPDATA "Programs\OmaWrite")
+    (Join-Path $env:LOCALAPPDATA "Programs\Omawrite")
 )
 $installParent = [IO.Path]::GetFullPath((Split-Path $installDirectory -Parent))
 $stagingDirectory = $installDirectory + ".installing"
@@ -40,13 +40,13 @@ function Find-PackageRoot {
 }
 
 function Get-LatestPackage {
-    $headers = @{ "User-Agent" = "OmaWrite-Windows-Installer" }
+    $headers = @{ "User-Agent" = "Omawrite-Windows-Installer" }
     $release = Invoke-RestMethod `
         -Headers $headers `
         -Uri "https://api.github.com/repos/$repository/releases/latest"
 
     $zipAsset = @($release.assets | Where-Object {
-        $_.name -match '^OmaWrite-Windows-.*-x64-portable\.zip$'
+        $_.name -match '^Omawrite-Windows-.*-x64-portable\.zip$'
     }) | Select-Object -First 1
     if ($null -eq $zipAsset) {
         throw "The latest release does not contain a Windows x64 package."
@@ -134,7 +134,7 @@ function Set-DefaultAppRegistration {
     New-ItemProperty -LiteralPath $classOpenWith -Name $progId `
         -Value "" -PropertyType String -Force | Out-Null
 
-    $capabilitiesPath = "Registry::HKEY_CURRENT_USER\Software\OmaWriteWindows\Capabilities"
+    $capabilitiesPath = "Registry::HKEY_CURRENT_USER\Software\OmawriteWindows\Capabilities"
     New-Item -Path (Join-Path $capabilitiesPath "FileAssociations") -Force | Out-Null
     New-ItemProperty -LiteralPath $capabilitiesPath -Name "ApplicationName" `
         -Value $registeredAppName -PropertyType String -Force | Out-Null
@@ -146,7 +146,7 @@ function Set-DefaultAppRegistration {
     $registeredApps = "Registry::HKEY_CURRENT_USER\Software\RegisteredApplications"
     New-Item -Path $registeredApps -Force | Out-Null
     New-ItemProperty -LiteralPath $registeredApps -Name $registeredAppName `
-        -Value "Software\OmaWriteWindows\Capabilities" -PropertyType String -Force | Out-Null
+        -Value "Software\OmawriteWindows\Capabilities" -PropertyType String -Force | Out-Null
 
     $explorerExtension = "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.md"
     $explorerProgIds = Join-Path $explorerExtension "OpenWithProgids"
@@ -159,23 +159,23 @@ function Set-InstalledAppRegistration {
     param([Parameter(Mandatory = $true)][string]$Executable)
 
     $startMenuDirectory = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs"
-    $shortcutPath = Join-Path $startMenuDirectory "OmaWrite for Windows.lnk"
+    $shortcutPath = Join-Path $startMenuDirectory "Omawrite for Windows.lnk"
     $shell = New-Object -ComObject WScript.Shell
     $shortcut = $shell.CreateShortcut($shortcutPath)
     $shortcut.TargetPath = $Executable
     $shortcut.WorkingDirectory = $installDirectory
-    $shortcut.Description = "OmaWrite Markdown editor"
+    $shortcut.Description = "Omawrite Markdown editor"
     $shortcut.IconLocation = $Executable + ",0"
     $shortcut.Save()
 
-    $uninstallPath = "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\OmaWriteWindows"
+    $uninstallPath = "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\OmawriteWindows"
     New-Item -Path $uninstallPath -Force | Out-Null
     New-ItemProperty -LiteralPath $uninstallPath -Name "DisplayName" `
         -Value $registeredAppName -PropertyType String -Force | Out-Null
     New-ItemProperty -LiteralPath $uninstallPath -Name "DisplayIcon" `
         -Value $Executable -PropertyType String -Force | Out-Null
     New-ItemProperty -LiteralPath $uninstallPath -Name "Publisher" `
-        -Value "OmaWrite contributors" -PropertyType String -Force | Out-Null
+        -Value "Omawrite contributors" -PropertyType String -Force | Out-Null
     New-ItemProperty -LiteralPath $uninstallPath -Name "InstallLocation" `
         -Value $installDirectory -PropertyType String -Force | Out-Null
     New-ItemProperty -LiteralPath $uninstallPath -Name "UninstallString" `
@@ -197,7 +197,7 @@ try {
         $_.Path -eq $installedExecutable
     })
     if ($runningInstalledApp.Count -gt 0) {
-        throw "Close OmaWrite before installing or updating it."
+        throw "Close Omawrite before installing or updating it."
     }
 
     if (Test-Path -LiteralPath $stagingDirectory) {
@@ -232,18 +232,18 @@ try {
     Set-DefaultAppRegistration -Executable $executable
     Set-InstalledAppRegistration -Executable $executable
 
-    if (-not ("OmaWriteShellNotify" -as [type])) {
+    if (-not ("OmawriteShellNotify" -as [type])) {
         Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
-public static class OmaWriteShellNotify {
+public static class OmawriteShellNotify {
     [DllImport("shell32.dll")]
     public static extern void SHChangeNotify(
         uint eventId, uint flags, IntPtr item1, IntPtr item2);
 }
 '@
     }
-    [OmaWriteShellNotify]::SHChangeNotify(
+    [OmawriteShellNotify]::SHChangeNotify(
         0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)
 
     if (-not $NoLaunch) {
@@ -254,7 +254,7 @@ public static class OmaWriteShellNotify {
         Start-Process "ms-settings:defaultapps?registeredAppUser=$escapedName"
     }
 
-    Write-Host "OmaWrite is installed at $installDirectory"
+    Write-Host "Omawrite is installed at $installDirectory"
 } finally {
     if ($temporaryDirectory -and (Test-Path -LiteralPath $temporaryDirectory)) {
         Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force

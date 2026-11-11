@@ -1254,72 +1254,6 @@ private slots:
         QCOMPARE(document.firstBlock().layout()->formats().constFirst().format.fontPointSize(), 1.0);
     }
 
-    void takesTheCodePanelFromTheTheme() {
-#ifdef Q_OS_WIN
-        QSKIP("Omarchy theme integration requires a Linux home directory.");
-#endif
-        QTemporaryDir homeDirectory;
-        QVERIFY(homeDirectory.isValid());
-
-        const QByteArray originalHome = qgetenv("HOME");
-        struct HomeRestorer {
-            QByteArray value;
-            ~HomeRestorer() { qputenv("HOME", value); }
-        } restoreHome{originalHome};
-        QVERIFY(qputenv("HOME", homeDirectory.path().toUtf8()));
-
-        const QString themeDirectory = homeDirectory.path()
-            + QStringLiteral("/.local/state/omarchy/current/theme");
-        QVERIFY(QDir().mkpath(themeDirectory));
-
-        Backend backend;
-        const auto codePanelFor = [&themeDirectory, &backend](const QByteArray &palette) {
-            QFile colorsFile(themeDirectory + QStringLiteral("/colors.toml"));
-            if (!colorsFile.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
-                return QColor();
-            colorsFile.write(palette);
-            colorsFile.close();
-            // Reload the same backend so a missing key cannot inherit the
-            // previous theme's panel color.
-            backend.setDarkMode(!backend.darkMode());
-            return QColor(backend.themeCodeBackground());
-        };
-
-        // The shade the theme names for panels wins.
-        QCOMPARE(codePanelFor("mode = \"dark\"\n"
-                              "background = \"#111c18\"\n"
-                              "foreground = \"#c1c497\"\n"
-                              "lighter_background = \"#23372b\"\n"),
-                 QColor(QStringLiteral("#23372b")));
-
-        // Themes naming none leave code on a shade mixed from the page: a
-        // little off the background, and nowhere near the text.
-        const QColor mixedDark = codePanelFor("mode = \"dark\"\n"
-                                              "background = \"#000000\"\n"
-                                              "foreground = \"#ffffff\"\n");
-        QVERIFY(mixedDark != QColor(Qt::black));
-        QVERIFY(mixedDark.lightness() < 60);
-
-        const QColor mixedLight = codePanelFor("mode = \"light\"\n"
-                                               "background = \"#ffffff\"\n"
-                                               "foreground = \"#000000\"\n");
-        QVERIFY(mixedLight != QColor(Qt::white));
-        QVERIFY(mixedLight.lightness() > 195);
-
-        QCOMPARE(codePanelFor("mode = \"light\"\n"
-                              "background = \"#ffffff\"\n"
-                              "foreground = \"#000000\"\n"
-                              "lighter_background = \"garbage\"\n"), mixedLight);
-
-        // A theme whose lighter background is the page itself would leave code
-        // with no panel at all, so it falls back to the mix as well.
-        QVERIFY(codePanelFor("mode = \"dark\"\n"
-                             "background = \"#0c0b0c\"\n"
-                             "foreground = \"#fafcfb\"\n"
-                             "lighter_background = \"#0c0b0c\"\n")
-                != QColor(QStringLiteral("#0c0b0c")));
-    }
-
     void rendersBoldItalicRuns() {
         const QString text = QStringLiteral("a ***word*** b");
         const auto markup = MarkdownHighlighter::inlineMarkup(text);
@@ -1415,20 +1349,23 @@ private slots:
     }
 
     void reportsThemeChangesOnlyWhenTheyHappen() {
-#ifdef Q_OS_WIN
-        QSKIP("Omarchy theme integration requires a Linux home directory.");
-#endif
-        ScopedTheme theme("mode = \"dark\"\nbackground = \"#111111\"\n");
-        QVERIFY(theme.ok);
         Backend backend;
         QSignalSpy colorsSpy(&backend, &Backend::themeColorsChanged);
         QSignalSpy modeSpy(&backend, &Backend::darkModeChanged);
 
-        // The theme names its mode, so the desktop's setting changes nothing.
-        backend.setDarkMode(false);
         QVERIFY(backend.darkMode());
+        QCOMPARE(backend.themeBackground(), QStringLiteral("#101010"));
+        QCOMPARE(backend.themeCodeBackground(), QStringLiteral("#1d1d1d"));
+        backend.setDarkMode(true);
         QCOMPARE(colorsSpy.count(), 0);
         QCOMPARE(modeSpy.count(), 0);
+
+        backend.setDarkMode(false);
+        QVERIFY(!backend.darkMode());
+        QCOMPARE(backend.themeBackground(), QStringLiteral("#ffffff"));
+        QCOMPARE(backend.themeCodeBackground(), QStringLiteral("#f2f2f2"));
+        QCOMPARE(colorsSpy.count(), 1);
+        QCOMPARE(modeSpy.count(), 1);
     }
 
     void ignoresInlineMarkdownInsideCodeSpans() {
@@ -1545,27 +1482,8 @@ private slots:
         QCOMPARE(mixed.at(1).kind, MarkdownHighlighter::InlineKind::Italic);
     }
 
-    void loadsCurrentOmarchyTheme() {
-#ifdef Q_OS_WIN
-        QSKIP("Omarchy theme integration requires a Linux home directory.");
-#endif
-        ScopedTheme theme(
-            "mode = \"light\"\n"
-            "accent = \"#112233\"\n"
-            "selection = \"#445566\"\n"
-            "selection_foreground = \"#fafafa\"\n"
-            "background = \"#fefefe\"\n"
-            "foreground = \"#101010\"\n");
-        QVERIFY(theme.ok);
-
+    void updatesEditorSelectionColorsWhenThemeChanges() {
         Backend backend;
-        QCOMPARE(backend.themeBackground(), QStringLiteral("#fefefe"));
-        QCOMPARE(backend.themeForeground(), QStringLiteral("#101010"));
-        QCOMPARE(backend.themeAccent(), QStringLiteral("#112233"));
-        QCOMPARE(backend.themeSelection(), QStringLiteral("#445566"));
-        QCOMPARE(backend.themeSelectionForeground(), QStringLiteral("#fafafa"));
-        QVERIFY(!backend.darkMode());
-
         const QString mainQmlPath = QFINDTESTDATA("../src/Main.qml");
         QVERIFY(!mainQmlPath.isEmpty());
 
@@ -1578,110 +1496,12 @@ private slots:
 
         QObject *editor = window->findChild<QObject *>(QStringLiteral("sourceEditor"));
         QVERIFY(editor);
-        QCOMPARE(editor->property("selectionColor").value<QColor>(), QColor("#445566"));
-        QCOMPARE(editor->property("selectedTextColor").value<QColor>(), QColor("#fafafa"));
-    }
+        QCOMPARE(editor->property("selectionColor").value<QColor>(), QColor("#186a9a"));
+        QCOMPARE(editor->property("selectedTextColor").value<QColor>(), QColor("#eeeeee"));
 
-    void fallsBackForSelectionColors_data() {
-        QTest::addColumn<QByteArray>("palette");
-        QTest::addColumn<QString>("selection");
-        QTest::addColumn<QString>("selectionForeground");
-
-        QTest::newRow("bright_foreground")
-            << QByteArray("foreground = \"#c0c0c0\"\n"
-                          "bright_foreground = \"#ffffff\"\n"
-                          "selection = \"#333333\"\n")
-            << QStringLiteral("#333333") << QStringLiteral("#ffffff");
-        QTest::newRow("foreground")
-            << QByteArray("foreground = \"#c0c0c0\"\n"
-                          "selection = \"#333333\"\n")
-            << QStringLiteral("#333333") << QStringLiteral("#c0c0c0");
-        QTest::newRow("selection_background")
-            << QByteArray("foreground = \"#c0c0c0\"\n"
-                          "selection_background = \"#222222\"\n")
-            << QStringLiteral("#222222") << QStringLiteral("#c0c0c0");
-    }
-
-    void fallsBackForSelectionColors() {
-#ifdef Q_OS_WIN
-        QSKIP("Omarchy theme integration requires a Linux home directory.");
-#endif
-        QFETCH(QByteArray, palette);
-        QFETCH(QString, selection);
-        QFETCH(QString, selectionForeground);
-
-        QTemporaryDir homeDirectory;
-        QVERIFY(homeDirectory.isValid());
-
-        const QByteArray originalHome = qgetenv("HOME");
-        struct HomeRestorer {
-            QByteArray value;
-            ~HomeRestorer() { qputenv("HOME", value); }
-        } restoreHome{originalHome};
-        QVERIFY(qputenv("HOME", homeDirectory.path().toUtf8()));
-
-        const QString themeDirectory = homeDirectory.path()
-            + QStringLiteral("/.local/state/omarchy/current/theme");
-        QVERIFY(QDir().mkpath(themeDirectory));
-
-        QFile colorsFile(themeDirectory + QStringLiteral("/colors.toml"));
-        QVERIFY(colorsFile.open(QIODevice::WriteOnly | QIODevice::Text));
-        QCOMPARE(colorsFile.write(palette), qint64(palette.size()));
-        colorsFile.close();
-
-        Backend backend;
-        QCOMPARE(backend.themeSelection(), selection);
-        QCOMPARE(backend.themeSelectionForeground(), selectionForeground);
-    }
-
-    void readsTomlValuesPastInlineComments() {
-        // Every colour in every theme is a quoted "#rrggbb": the hash inside the quotes stays.
-        QCOMPARE(Backend::tomlValue(QStringLiteral(" \"#1a1b26\" ")), QStringLiteral("#1a1b26"));
-        QCOMPARE(Backend::tomlValue(QStringLiteral("\"#EDE6D6\"   # unbleached cloth")),
-                 QStringLiteral("#EDE6D6"));
-        QCOMPARE(Backend::tomlValue(QStringLiteral("'#445566'# no space before the hash")),
-                 QStringLiteral("#445566"));
-        QCOMPARE(Backend::tomlValue(QStringLiteral("\"rebecca#purple\"")),
-                 QStringLiteral("rebecca#purple"));
-        QCOMPARE(Backend::tomlValue(QStringLiteral(" #1a1b26 ")), QStringLiteral("#1a1b26"));
-        QCOMPARE(Backend::tomlValue(QStringLiteral("\"#1a1b26")), QStringLiteral("\"#1a1b26"));
-        QCOMPARE(Backend::tomlValue(QStringLiteral("\"\"")), QString());
-        QCOMPARE(Backend::tomlValue(QString()), QString());
-    }
-
-    void keepsDefaultsForColorsItCannotParse() {
-#ifdef Q_OS_WIN
-        QSKIP("Omarchy theme integration requires a Linux home directory.");
-#endif
-        ScopedTheme theme(
-            "mode = \"dark\"          # warmed ink\r\n"
-            "accent = \"#112233\"     # shell-white pigment\r\n"
-            "selection = '#445566'\r\n"
-            "background = \"#1a1b17\" # ink, warmed\r\n"
-            "foreground = \"unbleached cloth\"\r\n");
-        QVERIFY(theme.ok);
-
-        Backend backend;
-        QCOMPARE(backend.themeBackground(), QStringLiteral("#1a1b17"));
-        QCOMPARE(backend.themeAccent(), QStringLiteral("#112233"));
-        QCOMPARE(backend.themeSelection(), QStringLiteral("#445566"));
-        QCOMPARE(backend.themeForeground(), QStringLiteral("#eeeeee"));
-        QVERIFY(backend.darkMode());
-    }
-
-    void takesItsDefaultsFromTheModeTheThemeAsksFor() {
-#ifdef Q_OS_WIN
-        QSKIP("Omarchy theme integration requires a Linux home directory.");
-#endif
-        ScopedTheme theme(
-            "mode = \"light\"\n"
-            "background = \"#ffffff\"\n"
-            "foreground = \"unbleached cloth\"\n");
-        QVERIFY(theme.ok);
-
-        Backend backend;
-        QVERIFY(!backend.darkMode());
-        QCOMPARE(backend.themeForeground(), QStringLiteral("#222324"));
+        backend.setDarkMode(false);
+        QCOMPARE(editor->property("selectionColor").value<QColor>(), QColor("#2077b2"));
+        QCOMPARE(editor->property("selectedTextColor").value<QColor>(), QColor("#222324"));
     }
 
     void ignoresFileWatcherEventsForSavedContents() {
@@ -2424,7 +2244,7 @@ private slots:
         QCOMPARE(saveSpy.count(), 1);
     }
 
-    void scalesTextWithDesktopTextSize() {
+    void scalesEditorFontWithZoom() {
         const QString mainQmlPath = QFINDTESTDATA("../src/Main.qml");
         QVERIFY(!mainQmlPath.isEmpty());
 
@@ -2440,33 +2260,33 @@ private slots:
         QVERIFY(editor);
         QCOMPARE(editor->property("font").value<QFont>().pixelSize(), 20);
 
-        // `omarchy display text size 16` sets the GNOME factor to 16/12.
-        backend.setDesktopTextScale(16.0 / 12.0);
-        QCOMPARE(window->property("editorFontPixelSize").toInt(), 27);
-        QCOMPARE(editor->property("font").value<QFont>().pixelSize(), 27);
+        const auto resetZoom = qScopeGuard([&backend] { backend.resetTextSize(); });
+        backend.increaseTextSize();
+        QCOMPARE(window->property("editorFontPixelSize").toInt(), 22);
+        QCOMPARE(editor->property("font").value<QFont>().pixelSize(), 22);
 
-        backend.setDesktopTextScale(9.0 / 12.0);
-        QCOMPARE(window->property("editorFontPixelSize").toInt(), 15);
-        QCOMPARE(editor->property("font").value<QFont>().pixelSize(), 15);
+        backend.decreaseTextSize();
+        backend.decreaseTextSize();
+        QCOMPARE(window->property("editorFontPixelSize").toInt(), 18);
+        QCOMPARE(editor->property("font").value<QFont>().pixelSize(), 18);
     }
 
-    void stepsTextSizeOnTopOfTheDesktopScale() {
+    void stepsTextSizeAndRemembersIt() {
         Backend backend;
         QSignalSpy textScaleSpy(&backend, &Backend::textScaleChanged);
-        backend.setDesktopTextScale(1.5);
-        QCOMPARE(backend.textScale(), 1.5);
+        QCOMPARE(backend.textScale(), 1.0);
 
         backend.increaseTextSize();
-        QCOMPARE(backend.textScale(), 1.5 * 1.1);
+        QCOMPARE(backend.textScale(), 1.1);
         backend.decreaseTextSize();
         backend.decreaseTextSize();
-        QCOMPARE(backend.textScale(), 1.5 * 0.9);
+        QCOMPARE(backend.textScale(), 0.9);
         QCOMPARE(backend.status(), QStringLiteral("Text size 90%"));
 
         // The ends of the ladder hold instead of running away.
         for (int step = 0; step < 8; ++step)
             backend.decreaseTextSize();
-        QCOMPARE(backend.textScale(), 1.5 * 0.5);
+        QCOMPARE(backend.textScale(), 0.5);
         const int settledCount = textScaleSpy.count();
         backend.decreaseTextSize();
         QCOMPARE(textScaleSpy.count(), settledCount);
@@ -2477,14 +2297,14 @@ private slots:
 
         for (int step = 0; step < 20; ++step)
             backend.increaseTextSize();
-        QCOMPARE(backend.textScale(), 1.5 * 3.0);
+        QCOMPARE(backend.textScale(), 3.0);
         QCOMPARE(Backend().textScale(), 3.0);
         const int maximumCount = textScaleSpy.count();
         backend.increaseTextSize();
         QCOMPARE(textScaleSpy.count(), maximumCount);
 
         backend.resetTextSize();
-        QCOMPARE(backend.textScale(), 1.5);
+        QCOMPARE(backend.textScale(), 1.0);
         QCOMPARE(Backend().textScale(), 1.0);
     }
 
@@ -2511,7 +2331,7 @@ private slots:
         };
 
         // A touchpad trickles in pixels: a nudge is not a whole step yet. Its
-        // events carry a synthesized angleDelta as well, as Wayland sends them.
+        // events can carry a synthesized angleDelta as well.
         scrollBy(240, 20);
         scrollBy(240, 20);
         QCOMPARE(backend.textScale(), 1.0);
@@ -2583,7 +2403,7 @@ private slots:
         QCOMPARE(window->property("width").toInt(), minimumWidth);
         QVERIFY(editor->property("x").toInt() > 0);
 
-        // A tiling compositor resizes below the minimum the window asks for.
+        // Simulate a viewport smaller than the requested minimum.
         window->setProperty("width", 394);
         QCoreApplication::processEvents();
         QCOMPARE(window->property("width").toInt(), 394);
@@ -2633,7 +2453,8 @@ private slots:
         QFETCH(qreal, scale);
         const QString mainQmlPath = QFINDTESTDATA("../src/Main.qml");
         Backend backend;
-        backend.setDesktopTextScale(scale);
+        const auto resetZoom = qScopeGuard([&backend] { backend.resetTextSize(); });
+        backend.setTextZoom(scale);
         QQmlEngine engine;
         engine.rootContext()->setContextProperty(QStringLiteral("backend"), &backend);
         QQmlComponent component(&engine, QUrl::fromLocalFile(mainQmlPath));
@@ -3023,30 +2844,6 @@ private slots:
         QVERIFY(!window->property("awaitingPendingSave").toBool());
     }
 
-    void savesInAFolderItCannotWriteNewFilesIn() {
-#ifdef Q_OS_WIN
-        QSKIP("This test uses Unix directory permissions to prevent file creation.");
-#endif
-        QTemporaryDir directory;
-        QVERIFY(directory.isValid());
-        const QString path = directory.filePath(QStringLiteral("shared.md"));
-        writeFile(path, "before");
-        QFile::setPermissions(directory.path(), QFile::ReadOwner | QFile::ExeOwner);
-
-        Backend backend;
-        QScopedPointer<QObject> editor(makeEditor(backend));
-        QVERIFY(editor);
-        backend.open(QUrl::fromLocalFile(path));
-        editor->setProperty("text", QStringLiteral("after"));
-        QVERIFY(backend.editorTextChanged());
-        backend.save();
-        QFile::setPermissions(directory.path(),
-                              QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
-
-        QVERIFY(!backend.modified());
-        QCOMPARE(readFile(path), QByteArray("after"));
-    }
-
     void removesARecoveryDraftItCannotRead() {
         Backend backend;
         const QString draft = backend.m_recoveryPath;
@@ -3397,24 +3194,6 @@ private:
         }
         return formats;
     }
-
-    // Points HOME at a scratch tree holding one colors.toml, and puts it back on the way out.
-    struct ScopedTheme {
-        explicit ScopedTheme(const QByteArray &palette) {
-            const QString themeDirectory = home.path()
-                + QStringLiteral("/.local/state/omarchy/current/theme");
-            QFile colorsFile(themeDirectory + QStringLiteral("/colors.toml"));
-            ok = home.isValid() && QDir().mkpath(themeDirectory)
-                && qputenv("HOME", home.path().toUtf8())
-                && colorsFile.open(QIODevice::WriteOnly | QIODevice::Text)
-                && colorsFile.write(palette) == qint64(palette.size());
-        }
-        ~ScopedTheme() { qputenv("HOME", originalHome); }
-
-        QTemporaryDir home;
-        QByteArray originalHome = qgetenv("HOME");
-        bool ok = false;
-    };
 
     // Builds a minimal TextEdit and attaches its document to the backend, so
     // editorTextChanged() sees real edits. The engine outlives the returned

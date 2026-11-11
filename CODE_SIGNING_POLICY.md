@@ -1,22 +1,11 @@
 # Code signing policy
 
-OmaWrite for Windows does not currently publish signed binaries. This document
-defines the boundary that a future signing integration must preserve.
+Omawrite's Windows binaries are currently unsigned. A SHA-256 file lets users check the bytes of a package against the value published for that release.
 
-- Release packages must be built from a public version tag by the repository's
-  GitHub Actions workflow.
-- A locally built executable must not be substituted into an official release.
-- The portable ZIP and Setup EXE must use the same source revision and version.
-- Every published package must retain its SHA-256 checksum.
-- Signing must cover the OmaWrite executable and installer only. Bundled
-  third-party binaries remain attributable to their original publishers.
-- Each signing request must require explicit approval after the public build
-  completes.
+## Release artifacts
 
-Project roles:
+Build the portable ZIP and Setup EXE from the same public tag in `joaoguimaraens/omawrite-windows` using the Windows workflow. Publish a SHA-256 file alongside each package and preserve the artifacts produced by that build. Identify the corresponding `omacom/omawrite` version or commit in the release notes.
 
-- Committer and reviewer: [AbrarZShahriar](https://github.com/AbrarZShahriar)
-- Signing approver: [AbrarZShahriar](https://github.com/AbrarZShahriar)
+## Future signing
 
-The application's data-transfer behavior is specified in
-[PRIVACY.md](PRIVACY.md).
+If signing is introduced, the project maintainers review signing requests after the tagged build completes. Sign the Omawrite executable and Setup EXE and preserve the signatures and attribution of bundled third-party binaries.

@@ -6,13 +6,13 @@
 #include <QQmlContext>
 #include <QQmlError>
 #include <QQuickStyle>
+#include <QStyleHints>
 #include <QUrl>
 #include <QWindow>
 #include <QFile>
 
 #include "backend.h"
 #include "cli.h"
-#include "systemtheme.h"
 
 #define OMAWRITE_VERSION "0.7.2"
 
@@ -22,21 +22,10 @@ int main(int argc, char *argv[]) {
             Cli::handleArguments(argc, argv, QStringLiteral(OMAWRITE_VERSION)))
         return *exitCode;
 
-    // Omarchy asks Qt for GTK 3 dialogs, which run inside this process, and a
-    // long-standing GTK 3 file chooser assertion aborts the whole app, unsaved
-    // text and all. The desktop portal shows the same chooser from a process
-    // of its own.
-    if (qgetenv("QT_QPA_PLATFORMTHEME") == "gtk3")
-        qputenv("QT_QPA_PLATFORMTHEME", "xdgdesktopportal");
-
     QApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("omawrite"));
     app.setApplicationVersion(QStringLiteral(OMAWRITE_VERSION));
-    app.setDesktopFileName(QStringLiteral("omawrite"));
-    QIcon appIcon = QIcon::fromTheme(QStringLiteral("omawrite"));
-    if (appIcon.isNull())
-        appIcon = QIcon(QStringLiteral(":/icons/omawrite.svg"));
-    app.setWindowIcon(appIcon);
+    app.setWindowIcon(QIcon(QStringLiteral(":/icons/omawrite.svg")));
 
     QFontDatabase::addApplicationFont(QStringLiteral(":/fonts/IBMPlexMono-Regular.ttf"));
     QFontDatabase::addApplicationFont(QStringLiteral(":/fonts/IBMPlexMono-Italic.ttf"));
@@ -48,10 +37,14 @@ int main(int argc, char *argv[]) {
     QQuickStyle::setStyle(QStringLiteral("Material"));
 
     Backend backend(&app);
-    SystemTheme systemTheme(&app);
-    backend.setDarkMode(systemTheme.darkMode());
-    QObject::connect(&systemTheme, &SystemTheme::darkModeChanged, &backend,
-                     &Backend::setDarkMode);
+    if (QStyleHints *styleHints = app.styleHints()) {
+        const auto applyColorScheme = [&backend](Qt::ColorScheme scheme) {
+            backend.setDarkMode(scheme != Qt::ColorScheme::Light);
+        };
+        applyColorScheme(styleHints->colorScheme());
+        QObject::connect(styleHints, &QStyleHints::colorSchemeChanged, &backend,
+                         applyColorScheme);
+    }
 
     // Carry the text scale into the default font, so the chrome that inherits
     // it (dialog titles, buttons) grows along with the writing area.
@@ -65,12 +58,7 @@ int main(int argc, char *argv[]) {
         app.setFont(scaled);
     };
 
-    // The desktop sets the baseline; the backend folds the user's own text
-    // size into it and reports the total.
-    backend.setDesktopTextScale(systemTheme.textScale());
     applyInterfaceFont(backend.textScale());
-    QObject::connect(&systemTheme, &SystemTheme::textScaleChanged, &backend,
-                     &Backend::setDesktopTextScale);
     QObject::connect(&backend, &Backend::textScaleChanged, &app,
                      [&backend, applyInterfaceFont]() {
         applyInterfaceFont(backend.textScale());

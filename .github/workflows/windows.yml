@@ -97,5 +97,5 @@ jobs:
             $zip.FullName ($zip.FullName + ".sha256") `
             $setup.FullName ($setup.FullName + ".sha256") `
             --repo $env:GITHUB_REPOSITORY `
-            --title "OmaWrite for Windows $env:GITHUB_REF_NAME" `
+            --title "Omawrite for Windows $env:GITHUB_REF_NAME" `
             --generate-notes

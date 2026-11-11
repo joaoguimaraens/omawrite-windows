@@ -6,12 +6,12 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$registeredAppName = "OmaWrite for Windows"
+$registeredAppName = "Omawrite for Windows"
 $installDirectory = [IO.Path]::GetFullPath(
-    (Join-Path $env:LOCALAPPDATA "Programs\OmaWrite")
+    (Join-Path $env:LOCALAPPDATA "Programs\Omawrite")
 )
 $expectedDirectory = [IO.Path]::GetFullPath(
-    (Join-Path $env:LOCALAPPDATA "Programs\OmaWrite")
+    (Join-Path $env:LOCALAPPDATA "Programs\Omawrite")
 )
 if ($installDirectory -ne $expectedDirectory) {
     throw "Refusing to remove an unexpected install directory."
@@ -22,7 +22,7 @@ $runningInstalledApp = @(Get-Process -Name "omawrite" -ErrorAction SilentlyConti
     $_.Path -eq $installedExecutable
 })
 if ($runningInstalledApp.Count -gt 0) {
-    throw "Close OmaWrite before removing it."
+    throw "Close Omawrite before removing it."
 }
 
 $scriptPath = [IO.Path]::GetFullPath($PSCommandPath)
@@ -44,7 +44,7 @@ if ($scriptIsInstalled -and -not $Detached) {
     )
     Start-Process -FilePath "powershell.exe" -ArgumentList $arguments `
         -WindowStyle Hidden
-    Write-Host "OmaWrite removal started."
+    Write-Host "Omawrite removal started."
     return
 }
 
@@ -53,10 +53,10 @@ if ($Detached) {
 }
 
 $registryPaths = @(
-    "Registry::HKEY_CURRENT_USER\Software\Classes\OmaWrite.Markdown",
+    "Registry::HKEY_CURRENT_USER\Software\Classes\Omawrite.Markdown",
     "Registry::HKEY_CURRENT_USER\Software\Classes\Applications\omawrite.exe",
-    "Registry::HKEY_CURRENT_USER\Software\OmaWriteWindows",
-    "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\OmaWriteWindows",
+    "Registry::HKEY_CURRENT_USER\Software\OmawriteWindows",
+    "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\OmawriteWindows",
     "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\{AE6883F4-1FC1-44FE-BE70-362A97A57B86}_is1"
 )
 foreach ($registryPath in $registryPaths) {
@@ -71,7 +71,7 @@ $valuePaths = @(
 )
 foreach ($valuePath in $valuePaths) {
     if (Test-Path -LiteralPath $valuePath) {
-        Remove-ItemProperty -LiteralPath $valuePath -Name "OmaWrite.Markdown" `
+        Remove-ItemProperty -LiteralPath $valuePath -Name "Omawrite.Markdown" `
             -ErrorAction SilentlyContinue
     }
 }
@@ -83,30 +83,30 @@ if (Test-Path -LiteralPath $registeredApps) {
 }
 
 $shortcutPath = Join-Path $env:APPDATA `
-    "Microsoft\Windows\Start Menu\Programs\OmaWrite for Windows.lnk"
+    "Microsoft\Windows\Start Menu\Programs\Omawrite for Windows.lnk"
 if (Test-Path -LiteralPath $shortcutPath) {
     Remove-Item -LiteralPath $shortcutPath -Force
 }
 
-if (-not ("OmaWriteUninstallShellNotify" -as [type])) {
+if (-not ("OmawriteUninstallShellNotify" -as [type])) {
     Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
-public static class OmaWriteUninstallShellNotify {
+public static class OmawriteUninstallShellNotify {
     [DllImport("shell32.dll")]
     public static extern void SHChangeNotify(
         uint eventId, uint flags, IntPtr item1, IntPtr item2);
 }
 '@
 }
-[OmaWriteUninstallShellNotify]::SHChangeNotify(
+[OmawriteUninstallShellNotify]::SHChangeNotify(
     0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)
 
 if (Test-Path -LiteralPath $installDirectory) {
     Remove-Item -LiteralPath $installDirectory -Recurse -Force
 }
 
-Write-Host "OmaWrite was removed."
+Write-Host "Omawrite was removed."
 
 if ($Detached -and (Test-Path -LiteralPath $scriptPath)) {
     Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue

@@ -1,28 +1,12 @@
 # Security
 
-## Supported releases
-
-Security fixes are applied to the latest Windows release. Reproduce an issue
-against that release before reporting it when possible.
-
 ## Report a vulnerability
 
-Use GitHub's [private vulnerability reporting
-form](https://github.com/AbrarZShahriar/omawrite-windows/security/advisories/new).
-Include the affected version, package type, observed impact, and minimal
-reproduction steps. Do not disclose an unpatched vulnerability or personal
-document contents in a public issue. If the form is unavailable, email
-`a.zshahriar@gmail.com`.
+For a vulnerability in the Windows port or its installer, use the private reporting option in the Windows fork's **Security** tab when it is available. Otherwise, contact the Windows maintainer privately. Include the affected Omawrite version, Windows version, package type, observed impact, and minimal steps to reproduce. Use a synthetic document if the issue needs one. [Windows fork security](https://github.com/joaoguimaraens/omawrite-windows/security)
 
-Ordinary defects and feature requests belong in the public
-[issue tracker](https://github.com/AbrarZShahriar/omawrite-windows/issues).
+Use the Windows fork's issue tracker for ordinary bugs and feature requests. For vulnerabilities in the upstream editor, follow the upstream project's reporting instructions. [Windows issues](https://github.com/joaoguimaraens/omawrite-windows/issues) · [Upstream security](https://github.com/omacom/omawrite/security)
 
 ## Release integrity
 
-Official Windows packages are attached to this repository's GitHub releases.
-Each portable ZIP and Setup EXE has a companion SHA-256 file. Compare the hash
-before running a downloaded package. The current binaries are unsigned; Windows
-can therefore show a reputation warning even when the checksum is correct.
-
-See [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md) for the build and signing
-boundary.
+For a published package, compare its SHA-256 hash with the companion checksum from the same release. Use `Get-FileHash -Algorithm SHA256` in PowerShell.
+Windows can show a reputation warning for unsigned binaries. [Code signing policy](CODE_SIGNING_POLICY.md)

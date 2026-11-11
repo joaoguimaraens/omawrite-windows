@@ -21,15 +21,11 @@ ApplicationWindow {
     readonly property color mutedColor: darkMode ? "#909191" : "#aeb1b5"
     readonly property color selectionFill: backend.themeSelection
     readonly property color selectionTextColor: backend.themeSelectionForeground
-    // The desktop's text size knob (GNOME's text-scaling-factor, which
-    // `omarchy display text size` drives) anchored so its 12px default leaves
-    // the app at the sizes it was designed around, times the user's own
-    // text size set with Ctrl+= / Ctrl+- / Ctrl+wheel.
     readonly property real textScale: backend.textScale
     readonly property int editorFontPixelSize: scaledSize(20)
     readonly property int footerHeight: scaledSize(32)
-    // Never wider than the Flickable's viewport, whatever the floor asks for:
-    // a tiling compositor can resize the window below its minimum width.
+    // Keep the editor within the viewport even if the window is resized
+    // below its requested minimum width.
     readonly property int editorWidth: Math.min(
         Math.round(writerFontMetrics.averageCharacterWidth * 65),
         Math.max(360, width - Math.round(writerFontMetrics.averageCharacterWidth * 20)),
@@ -266,7 +262,7 @@ ApplicationWindow {
     }
 
     Shortcut {
-        sequences: ["Meta+F", "F11"]
+        sequence: "F11"
         onActivated: toggleFullScreen()
     }
 
@@ -524,12 +520,8 @@ ApplicationWindow {
             }
 
             WheelHandler {
-                // Wayland compositors route every pointer's scroll through
-                // one seat device that Qt classifies as a touchpad, so the
-                // device type cannot tell a mouse wheel from two-finger
-                // scrolling. Distinguish by event shape instead: discrete
-                // wheel notches arrive with only angleDelta set, while
-                // finger scrolling carries pixel-precise pixelDelta.
+                // Wheel notches arrive with only angleDelta set. Precise
+                // touchpad scrolling carries pixelDelta.
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                 onWheel: function(wheel) {
                     if (wheel.modifiers & Qt.ControlModifier) {

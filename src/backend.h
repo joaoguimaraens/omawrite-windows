@@ -49,15 +49,13 @@ public:
     int wordCount() const { return m_wordCount; }
     bool darkMode() const { return m_darkMode; }
     void setDarkMode(bool darkMode);
-    // What the desktop asks for, times what the user asked for on top of it.
-    qreal textScale() const { return m_desktopTextScale * m_textZoom; }
-    void setDesktopTextScale(qreal textScale);
+    qreal textScale() const { return m_textZoom; }
     QString themeBackground() const { return m_themeBackground; }
     QString themeForeground() const { return m_themeForeground; }
     QString themeAccent() const { return m_themeAccent; }
     QString themeSelection() const { return m_themeSelection; }
     QString themeCodeBackground() const { return m_themeCodeBackground; }
-    QString themeSelectionForeground() const { return m_themeSelectionForeground; }
+    QString themeSelectionForeground() const { return m_themeForeground; }
     QString editorFont() const { return m_editorFont; }
     void setEditorFont(const QString &family);
     QStringList availableFonts() const;
@@ -66,7 +64,6 @@ public:
     static int countWords(const QString &text);
     static QString normalizedLinkUrl(const QString &clipboardText);
     static QString suggestedFileName(const QString &text);
-    static QString tomlValue(const QString &text);
     static QFont printFont(const QFont &editorFont, qreal screenDpi);
 
     Q_INVOKABLE void attachDocument(QObject *textDocument);
@@ -147,17 +144,13 @@ private:
     void unwatchFiles();
     void watchCurrentFile();
     void checkWatchedFile();
-    void loadOmarchyTheme();
-    void watchOmarchyTheme();
+    void updateThemeColors();
 
     QUrl m_fileUrl;
     bool m_modified = false;
     QString m_status;
     int m_wordCount = 0;
     bool m_darkMode = true;
-    // The desktop's light/dark setting, used when the Omarchy theme names none.
-    bool m_systemDarkMode = true;
-    qreal m_desktopTextScale = 1.0;
     qreal m_textZoom = 1.0;
     bool m_loading = false;
     bool m_formattingTypography = false;
@@ -192,8 +185,5 @@ private:
     QString m_themeAccent;
     QString m_themeSelection;
     QString m_themeCodeBackground;
-    QString m_themeSelectionForeground;
     QString m_editorFont;
-    QFileSystemWatcher m_themeWatcher;
-    QTimer m_themeReloadTimer;
 };

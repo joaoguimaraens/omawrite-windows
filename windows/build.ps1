@@ -42,10 +42,10 @@ $appBuild = Join-Path $buildRoot "app"
 $testBuild = Join-Path $buildRoot "tests"
 $distDirectory = Join-Path $root "dist"
 $safeVersion = [regex]::Replace($Version, '[^A-Za-z0-9._-]', '-')
-$packageName = "OmaWrite-Windows-$safeVersion-x64-portable"
+$packageName = "Omawrite-Windows-$safeVersion-x64-portable"
 $packageDirectory = Join-Path $distDirectory $packageName
 $packageZip = Join-Path $distDirectory ($packageName + ".zip")
-$setupName = "OmaWrite-Windows-$safeVersion-x64-Setup"
+$setupName = "Omawrite-Windows-$safeVersion-x64-Setup"
 $setupExecutable = Join-Path $distDirectory ($setupName + ".exe")
 
 function Reset-ChildDirectory {
@@ -202,7 +202,8 @@ Copy-Item -LiteralPath (Join-Path $root "windows\uninstall.ps1") `
     -Destination (Join-Path $packageDirectory "windows")
 
 $deployCommand = '"' + $deployTool + '" --release --compiler-runtime ' +
-    '--no-translations --qmldir "' + (Join-Path $root "src") + '" "' +
+    '--no-translations --skip-plugin-types qmltooling ' +
+    '--qmldir "' + (Join-Path $root "src") + '" "' +
     (Join-Path $packageDirectory "omawrite.exe") + '"'
 Invoke-DeveloperCommand -Command $deployCommand
 

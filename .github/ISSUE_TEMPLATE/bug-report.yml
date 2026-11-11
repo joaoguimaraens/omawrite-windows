@@ -11,7 +11,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: OmaWrite version
+      label: Omawrite version
       placeholder: v0.5.0-windows.1
     validations:
       required: true

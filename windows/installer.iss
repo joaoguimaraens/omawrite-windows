@@ -11,15 +11,15 @@
 
 [Setup]
 AppId={{AE6883F4-1FC1-44FE-BE70-362A97A57B86}
-AppName=OmaWrite for Windows
+AppName=Omawrite for Windows
 AppVersion={#ReleaseVersion}
-AppVerName=OmaWrite for Windows {#ReleaseVersion}
-AppPublisher=OmaWrite contributors
-AppPublisherURL=https://github.com/AbrarZShahriar/omawrite-windows
-AppSupportURL=https://github.com/AbrarZShahriar/omawrite-windows/issues
-AppUpdatesURL=https://github.com/AbrarZShahriar/omawrite-windows/releases/latest
-DefaultDirName={localappdata}\Programs\OmaWrite
-DefaultGroupName=OmaWrite for Windows
+AppVerName=Omawrite for Windows {#ReleaseVersion}
+AppPublisher=Omawrite contributors
+AppPublisherURL=https://github.com/joaoguimaraens/omawrite-windows
+AppSupportURL=https://github.com/joaoguimaraens/omawrite-windows/issues
+AppUpdatesURL=https://github.com/joaoguimaraens/omawrite-windows/releases/latest
+DefaultDirName={localappdata}\Programs\Omawrite
+DefaultGroupName=Omawrite for Windows
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 SetupArchitecture=x64
@@ -29,40 +29,40 @@ RestartApplications=no
 WizardStyle=modern
 Compression=lzma2/ultra64
 SolidCompression=yes
-SetupIconFile=..\pkgbuild\omawrite.ico
+SetupIconFile=omawrite.ico
 UninstallDisplayIcon={app}\omawrite.exe
 LicenseFile=..\LICENSE
-OutputBaseFilename=OmaWrite-Windows-Setup-x64
+OutputBaseFilename=Omawrite-Windows-Setup-x64
 VersionInfoVersion=0.7.2.0
-VersionInfoDescription=OmaWrite for Windows Setup
-VersionInfoCompany=OmaWrite contributors
-VersionInfoCopyright=Copyright (c) OmaWrite contributors
+VersionInfoDescription=Omawrite for Windows Setup
+VersionInfoCompany=Omawrite contributors
+VersionInfoCopyright=Copyright (c) Omawrite contributors
 
 [Files]
 Source: "{#PackageDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\OmaWrite for Windows"; Filename: "{app}\omawrite.exe"; WorkingDir: "{app}"
+Name: "{group}\Omawrite for Windows"; Filename: "{app}\omawrite.exe"; WorkingDir: "{app}"
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\OmaWriteWindows"; Flags: deletekey
-Root: HKCU; Subkey: "Software\Classes\OmaWrite.Markdown"; ValueType: string; ValueName: ""; ValueData: "Markdown Document"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\OmaWrite.Markdown\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\omawrite.exe,0"
-Root: HKCU; Subkey: "Software\Classes\OmaWrite.Markdown\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\omawrite.exe"" ""%1"""
-Root: HKCU; Subkey: "Software\Classes\Applications\omawrite.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "OmaWrite for Windows"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\OmawriteWindows"; Flags: deletekey
+Root: HKCU; Subkey: "Software\Classes\Omawrite.Markdown"; ValueType: string; ValueName: ""; ValueData: "Markdown Document"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Omawrite.Markdown\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\omawrite.exe,0"
+Root: HKCU; Subkey: "Software\Classes\Omawrite.Markdown\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\omawrite.exe"" ""%1"""
+Root: HKCU; Subkey: "Software\Classes\Applications\omawrite.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "Omawrite for Windows"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\Applications\omawrite.exe\SupportedTypes"; ValueType: string; ValueName: ".md"; ValueData: ""
 Root: HKCU; Subkey: "Software\Classes\Applications\omawrite.exe\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\omawrite.exe"" ""%1"""
-Root: HKCU; Subkey: "Software\Classes\.md\OpenWithProgids"; ValueType: string; ValueName: "OmaWrite.Markdown"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty
-Root: HKCU; Subkey: "Software\OmaWriteWindows\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "OmaWrite for Windows"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\OmaWriteWindows\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "A focused native Markdown writing app."
-Root: HKCU; Subkey: "Software\OmaWriteWindows\Capabilities\FileAssociations"; ValueType: string; ValueName: ".md"; ValueData: "OmaWrite.Markdown"
-Root: HKCU; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "OmaWrite for Windows"; ValueData: "Software\OmaWriteWindows\Capabilities"; Flags: uninsdeletevalue
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.md\OpenWithProgids"; ValueType: string; ValueName: "OmaWrite.Markdown"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\Classes\.md\OpenWithProgids"; ValueType: string; ValueName: "Omawrite.Markdown"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\OmawriteWindows\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "Omawrite for Windows"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\OmawriteWindows\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "A focused native Markdown writing app."
+Root: HKCU; Subkey: "Software\OmawriteWindows\Capabilities\FileAssociations"; ValueType: string; ValueName: ".md"; ValueData: "Omawrite.Markdown"
+Root: HKCU; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "Omawrite for Windows"; ValueData: "Software\OmawriteWindows\Capabilities"; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.md\OpenWithProgids"; ValueType: string; ValueName: "Omawrite.Markdown"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty
 
 [Run]
 Filename: "{app}\vc_redist.x64.exe"; Parameters: "/install /passive /norestart"; StatusMsg: "Installing the Microsoft Visual C++ runtime..."; Check: VCRuntimeNeeded; Flags: waituntilterminated
-Filename: "{app}\omawrite.exe"; Description: "Launch OmaWrite"; Flags: nowait postinstall skipifsilent
-Filename: "ms-settings:defaultapps?registeredAppUser=OmaWrite%20for%20Windows"; Description: "Choose OmaWrite for Markdown files"; Flags: shellexec nowait postinstall skipifsilent
+Filename: "{app}\omawrite.exe"; Description: "Launch Omawrite"; Flags: nowait postinstall skipifsilent
+Filename: "ms-settings:defaultapps?registeredAppUser=Omawrite%20for%20Windows"; Description: "Choose Omawrite for Markdown files"; Flags: shellexec nowait postinstall skipifsilent
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"

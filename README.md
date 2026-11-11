@@ -1,93 +1,60 @@
-# OmaWrite for Windows
+# Omawrite for Windows
 
-[![Windows build](https://github.com/AbrarZShahriar/omawrite-windows/actions/workflows/windows.yml/badge.svg)](https://github.com/AbrarZShahriar/omawrite-windows/actions/workflows/windows.yml)
-[![Latest release](https://img.shields.io/github/v/release/AbrarZShahriar/omawrite-windows?label=Windows%20release)](https://github.com/AbrarZShahriar/omawrite-windows/releases/latest)
+Omawrite is a native Markdown editor for Windows 11 x64. It follows the system theme and is available as a portable ZIP or a per-user installer.
 
-The low-friction native Windows build of
-[Omawrite](https://github.com/omacom/omawrite), a focused Markdown writing
-app built with Qt Quick and C++. This is an unofficial Windows fork. It keeps
-the upstream Linux build working and follows the Windows light or dark theme.
-
-<img width="2948" height="3227" alt="screenshot-2026-06-23_15-24-08" src="https://github.com/user-attachments/assets/4e930c0d-edda-4046-b444-a59eff523329" />
-<img width="2948" height="3227" alt="screenshot-2026-06-23_15-23-23" src="https://github.com/user-attachments/assets/8ced7c26-961b-4ded-b263-84403001a951" />
-
-## Engineering case study
-
-The upstream application was designed for a Linux/Omarchy environment. Its
-desktop integration assumed DBus, XDG portals, and Linux theme settings, while
-Windows users needed a native executable with predictable installation and no
-compatibility layer.
-
-The Windows port keeps the upstream Linux behavior intact and isolates
-platform-specific decisions at the operating-system boundary:
-
-- Windows theme detection uses Qt's native color-scheme API instead of a
-  parallel application theme system.
-- The build uses Qt 6.8.3 and MSVC 2022 x64, then runs `windeployqt` to collect
-  the actual Qt runtime and QML dependency tree.
-- The same release pipeline produces a portable ZIP and a per-user installer,
-  with SHA-256 checksums for both artifacts.
-- The installer registers OmaWrite as a Markdown application, supports clean
-  uninstall, and does not require administrator access in the normal case.
-- GitHub Actions builds and tests the Windows package from source.
-
-The result is a release a user can evaluate immediately and a build another
-engineer can reproduce, inspect, or extend.
-
+`@joaoguimaraens` maintains the Windows port in `joaoguimaraens/omawrite-windows`. `omacom/omawrite` is the upstream project and the source for editor updates. Each Windows update identifies the upstream version or commit it is based on. [Windows fork](https://github.com/joaoguimaraens/omawrite-windows) · [Upstream Omawrite](https://github.com/omacom/omawrite)
 
 ## Start on Windows
 
-The fastest option is to download and run the x64 Setup EXE from the
-[latest release](https://github.com/AbrarZShahriar/omawrite-windows/releases/latest).
-It contains the complete app and does not download files during installation.
+- Run the x64 Setup EXE to install Omawrite for the current user. Use **Settings > Apps > Installed apps** to uninstall it.
+- Extract the x64 portable ZIP and run `omawrite.exe` to use the editor directly.
 
-Prefer no installer? Download the x64 portable ZIP, extract it, and run
-`omawrite.exe`. The ZIP contains the compiled app and every required Qt file.
+Both packages include the editor and its Qt runtime. Windows can show a reputation warning for the unsigned executables. The signing policy is in `CODE_SIGNING_POLICY.md` in the source repository.
 
-You can also clone this repository or use **Code > Download ZIP**, then
-double-click `install-windows.cmd`. If Windows Settings opens, select OmaWrite
-for `.md` files.
-
-The repository installer downloads the latest release, verifies its SHA-256
-checksum, and installs it for the current user. It does not require
-administrator access unless the Microsoft Visual C++ runtime is missing.
-
-To remove the app, double-click `uninstall-windows.cmd` or use the Windows
-Installed apps page.
-
-Releases are built in public GitHub Actions runs and include SHA-256 checksums.
-The executable is not currently code-signed, so Windows can show a reputation
-warning on first launch. See the [code signing policy](CODE_SIGNING_POLICY.md)
-for the release boundary.
-
-The editor has no telemetry or network client. It reads and writes local files;
-opening a link hands that link to the default browser. The optional repository
-installer contacts GitHub only when you run it to download a release. See the
-[privacy statement](PRIVACY.md) for the complete boundary.
-
-The current build targets Intel and AMD x86-64 computers running Windows 11.
-Windows 11 does not have a 32-bit x86 edition. ARM64 is not currently a native
-build target.
+Download published Windows packages from this fork. Build locally if a release is unavailable. [Windows releases](https://github.com/joaoguimaraens/omawrite-windows/releases)
 
 ## Build on Windows
 
-Install Visual Studio Build Tools 2022 with the C++ workload, then double-click
-`build-windows.cmd`. The build script downloads a verified Qt 6.8.3 toolchain,
-runs the test suite, deploys the runtime, and creates a portable ZIP plus a
-Setup EXE in `dist`.
+Install Visual Studio Build Tools 2022 with the C++ workload and run the build from the repository root.
 
-Run the generated Setup EXE to install the local build, or extract its portable
-ZIP to run it directly.
+```powershell
+.\build-windows.cmd
+```
 
-## Install on Omarchy
+The script provisions Qt 6.8.3 and Inno Setup as needed, compiles the app, runs the Windows test suite, and writes the portable ZIP and Setup EXE to `dist/`. Find the test log in `.build/windows/tests/results.txt`.
 
-Install the `omawrite` package from the Omarchy Package Repository. Omawrite is
-installed by default in new Omarchy installations from Quattro forward.
+## Upstream updates
+
+Use your Windows fork as `origin` and `omacom/omawrite` as `upstream`. If `upstream` is missing, add it once.
+
+```powershell
+git remote add upstream https://github.com/omacom/omawrite.git
+```
+
+From the Windows branch, fetch and merge the editor updates.
+
+```powershell
+git fetch upstream --tags
+git merge upstream/master
+```
+
+Preserve the Windows build and installer when resolving conflicts. In update commits or pull requests and in release notes, identify the upstream tag or commit, such as `omacom/omawrite v0.7.2`, and describe the Windows changes.
+
+## Release verification
+
+Keep the version metadata in `src/main.cpp`, `omawrite.pro`, and `windows/installer.iss` in sync. Open a Markdown file from the extracted ZIP and verify installation and removal with Setup on Windows. The Windows GitHub Actions workflow builds and tests both packages and generates SHA-256 files for tagged releases.
 
 ## Command line
 
-`omawrite` opens an empty document and `omawrite FILE` opens a Markdown file.
-`omawrite --help` and `omawrite --version` answer in the terminal without opening a window.
+From the folder containing `omawrite.exe`, run the following in PowerShell.
+
+```powershell
+.\omawrite.exe .\document.md
+.\omawrite.exe --version | Write-Output
+.\omawrite.exe --help | Write-Output
+```
+
+Run `omawrite.exe` without arguments to open an empty document.
 
 ## Shortcuts
 
@@ -97,77 +64,23 @@ installed by default in new Omarchy installations from Quattro forward.
 - `Ctrl+P` opens the system print dialog.
 - `Ctrl+N` opens a new Omawrite window.
 - `Ctrl+Z`, `Ctrl+Shift+Z`, and `Ctrl+Y` handle undo and redo.
-- `F11` or `Super+F` toggles fullscreen.
+- `F11` toggles fullscreen.
 - `Ctrl+F` searches the document. Use `Enter` or `Ctrl+G` for the next match and `Shift+Enter` for the previous match.
 - `Ctrl+H` opens find and replace.
 - `Ctrl+B`, `Ctrl+I`, and `Ctrl+Shift+X` toggle bold, italic, and strikethrough Markdown. `Ctrl+K` inserts a link.
-- `Ctrl+=` and `Ctrl+-` change the text size, `Ctrl+0` returns to the default.
-  `Ctrl+scroll` does the same.
+- `Ctrl+=` and `Ctrl+-` change the text size, `Ctrl+0` returns to the default. `Ctrl+scroll` does the same.
 - `Ctrl+Shift+C` copies the rendered document as HTML, with plain text as a fallback.
 - `Ctrl+?`, `Ctrl+/`, or `F1` shows the keyboard shortcut reference.
-- In the unsaved-changes dialog, `Alt+C`, `Alt+D`, and `Alt+S` choose Cancel,
-  Discard, and Save.
+- In the unsaved-changes dialog, `Alt+C`, `Alt+D`, and `Alt+S` choose Cancel, Discard, and Save.
 
-Once a document has been saved to a file, edits are auto-saved to that file a
-moment after you stop typing, so `Ctrl+S` is rarely needed. Untitled drafts are
-never auto-saved — they wait for an explicit save so Omawrite never picks a file
-name for you. Unsaved drafts are recovered after an abnormal exit. Omawrite also
-watches open files and warns before an external change can replace local work;
-auto-save pauses until you reload, keep your version, or save. A recovered draft
-is never auto-saved over its file — save it to keep it.
+Once a document has been saved to a file, edits are auto-saved to that file a moment after you stop typing, so `Ctrl+S` is rarely needed. Untitled drafts are saved when you choose a filename. Omawrite recovers unsaved drafts after an abnormal exit. When a file changes externally, auto-save pauses until you reload, keep your version, or save. Save a recovered draft explicitly to write it to disk.
 
-The font button in the footer picks the writing font from any installed text font,
-and Omawrite remembers the choice. IBM Plex Mono is the default.
+The font button in the footer picks the writing font from any installed text font, and Omawrite remembers the choice. IBM Plex Mono is the default.
 
-On Linux, text follows `omarchy display text size` or GNOME's
-`text-scaling-factor` and re-flows without a restart. Windows starts at the
-app's default text size. On both platforms, `Ctrl+=`, `Ctrl+-`, and `Ctrl+scroll`
-adjust the size from 50% to 300%. Omawrite remembers it for new windows.
+Use `Ctrl+=`, `Ctrl+-`, or `Ctrl+scroll` to adjust text size from 50% to 300%. Omawrite remembers the size for new windows.
 
-## Linux requirements
+## Licensing and security
 
-- Qt 6: `qt6-base` and `qt6-declarative` (which includes Qt Quick Controls)
-- `xdg-desktop-portal` and a portal backend
+Omawrite is distributed under the MIT License. Bundled Qt libraries and the IBM Plex Mono font have separate licenses. [Third-party notices](THIRD-PARTY-NOTICES.md)
 
-The bundled IBM Plex Mono font is copyright IBM Corp. Its SIL Open Font License
-1.1 is in `fonts/OFL.txt`.
-
-The Windows package dynamically links to Qt 6 under the GNU Lesser General
-Public License v3. See `THIRD-PARTY-NOTICES.md` for distribution details.
-
-Security reports are handled privately as described in
-[SECURITY.md](SECURITY.md).
-## Build and install on Linux
-
-For a local build, install the Qt requirements above, a C++17 compiler such as
-`gcc`, and `make`. The build scripts use `qmake6` (or `qmake`), and the tests use
-QtTest; both ship in `qt6-base`.
-
-```sh
-./bin/build
-./bin/test
-./build/omawrite
-```
-
-`bin/test` runs the Qt test suite with the offscreen platform, so it does not
-require an active graphical session. To open a file with the local build:
-
-```sh
-./build/omawrite path/to/document.md
-```
-
-On Arch Linux or Omarchy, install `base-devel` for the packaging tools, then
-build and install the package:
-
-```sh
-./bin/install
-```
-
-This runs the local build and `makepkg -fsi`, which installs the package through
-pacman and may ask for authentication. To build a package archive for inspection
-without installing it:
-
-```sh
-cd pkgbuild
-makepkg -f
-```
+The source repository includes `PRIVACY.md` for local document handling and `SECURITY.md` for vulnerability reports.

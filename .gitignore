@@ -1,14 +1,6 @@
-/build/
-/build-tests/
 /.build/
 /.tools/
 /dist/
-/pkg/
-/pkgbuild/pkg/
-/pkgbuild/src/
-*.pkg.tar.*
-*.src.tar.*
-*.o
 *.moc
 moc_*.cpp
 qrc_*.cpp
