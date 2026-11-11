@@ -149,9 +149,16 @@ jobs:
             throw "Expected exactly one Setup EXE, found $($setups.Count)."
           }
           $setup = $setups[0]
+          $releaseOptions = @("--generate-notes", "--verify-tag")
+          if ($env:GITHUB_REF_NAME -match '-') {
+            $releaseOptions += @("--prerelease", "--latest=false")
+          }
           gh release create $env:GITHUB_REF_NAME `
             $zip.FullName ($zip.FullName + ".sha256") `
             $setup.FullName ($setup.FullName + ".sha256") `
             --repo $env:GITHUB_REPOSITORY `
             --title "Omawrite for Windows $env:GITHUB_REF_NAME" `
-            --generate-notes
+            @releaseOptions
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub release publication failed with code $LASTEXITCODE."
+          }

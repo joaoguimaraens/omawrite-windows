@@ -44,6 +44,8 @@ Preserve the Windows build and installer when resolving conflicts. In update com
 
 Keep the version metadata in `src/main.cpp`, `omawrite.pro`, and `windows/installer.iss` in sync. Open a Markdown file from the extracted ZIP and verify installation and removal with Setup on Windows. The Windows GitHub Actions workflow builds and tests both packages and generates SHA-256 files for tagged releases.
 
+Push a `v*` tag to publish the verified packages. Tags with a prerelease suffix, such as `v0.7.2-windows.1-rc.1`, are published as GitHub prereleases and do not replace the latest stable release.
+
 ## Command line
 
 From the folder containing `omawrite.exe`, run the following in PowerShell.
