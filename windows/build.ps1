@@ -18,6 +18,13 @@ if ($useSuppliedQt) {
     $qtInstallRoot = Join-Path $qtDirectory "6.8.3\msvc2022_64"
 }
 $qmake = Join-Path $qtInstallRoot "bin\qmake.exe"
+$deployTool = Join-Path $qtInstallRoot "bin\windeployqt.exe"
+$qtBuildFiles = @(
+    $qmake
+    $deployTool
+    (Join-Path $qtInstallRoot "mkspecs\modules\qt_lib_quick.pri")
+    (Join-Path $qtInstallRoot "qml\QtQuick\Controls\Material\qmldir")
+)
 $aqt = Join-Path $toolsDirectory "aqt_x64.exe"
 $aqtUri = "https://github.com/miurahr/aqtinstall/releases/download/v3.3.0/aqt_x64.exe"
 $aqtHash = "4f74d4c95c464d238d7e17ec2d9b7f22a7c333f0f5270a62584e2b47fc765150"
@@ -70,9 +77,9 @@ function Invoke-DeveloperCommand {
 }
 
 New-Item -ItemType Directory -Path $toolsDirectory -Force | Out-Null
-if (-not (Test-Path -LiteralPath $qmake)) {
+if ((Test-Path -LiteralPath $qtBuildFiles -PathType Leaf) -contains $false) {
     if ($useSuppliedQt) {
-        throw "qmake.exe was not found under the supplied Qt root: $qtInstallRoot"
+        throw "The supplied Qt root is missing build or deployment files: $qtInstallRoot"
     }
     if (-not (Test-Path -LiteralPath $aqt)) {
         Invoke-WebRequest -UseBasicParsing -Uri $aqtUri -OutFile $aqt
@@ -83,7 +90,7 @@ if (-not (Test-Path -LiteralPath $qmake)) {
     }
 
     & $aqt install-qt windows desktop 6.8.3 win64_msvc2022_64 `
-        --outputdir $qtDirectory
+        --timeout 60 --outputdir $qtDirectory
     if ($LASTEXITCODE -ne 0) {
         throw "Qt installation failed with code $LASTEXITCODE."
     }
@@ -143,21 +150,31 @@ $oldPath = $env:Path
 $oldPluginPath = $env:QT_PLUGIN_PATH
 $oldQmlPath = $env:QML2_IMPORT_PATH
 $oldPlatform = $env:QT_QPA_PLATFORM
+$oldFontDirectory = $env:QT_QPA_FONTDIR
 try {
     $env:Path = (Join-Path $qtInstallRoot "bin") + ";" + $env:Path
     $env:QT_PLUGIN_PATH = Join-Path $qtInstallRoot "plugins"
     $env:QML2_IMPORT_PATH = Join-Path $qtInstallRoot "qml"
     $env:QT_QPA_PLATFORM = "offscreen"
+    if (-not $env:QT_QPA_FONTDIR) {
+        $env:QT_QPA_FONTDIR = Join-Path $env:SystemRoot "Fonts"
+    }
     $testExecutable = Join-Path $testBuild "release\tst_omawrite.exe"
-    & $testExecutable -txt
-    if ($LASTEXITCODE -ne 0) {
-        throw "The test suite failed with code $LASTEXITCODE."
+    $testLog = Join-Path $testBuild "results.txt"
+    & $testExecutable -o "$testLog,txt"
+    $testExitCode = $LASTEXITCODE
+    if (Test-Path -LiteralPath $testLog) {
+        Get-Content -LiteralPath $testLog
+    }
+    if ($testExitCode -ne 0) {
+        throw "The test suite failed with code $testExitCode."
     }
 } finally {
     $env:Path = $oldPath
     $env:QT_PLUGIN_PATH = $oldPluginPath
     $env:QML2_IMPORT_PATH = $oldQmlPath
     $env:QT_QPA_PLATFORM = $oldPlatform
+    $env:QT_QPA_FONTDIR = $oldFontDirectory
 }
 
 New-Item -ItemType Directory -Path $distDirectory -Force | Out-Null
@@ -184,7 +201,6 @@ Copy-Item -LiteralPath (Join-Path $root "windows\install.ps1") `
 Copy-Item -LiteralPath (Join-Path $root "windows\uninstall.ps1") `
     -Destination (Join-Path $packageDirectory "windows")
 
-$deployTool = Join-Path $qtInstallRoot "bin\windeployqt.exe"
 $deployCommand = '"' + $deployTool + '" --release --compiler-runtime ' +
     '--no-translations --qmldir "' + (Join-Path $root "src") + '" "' +
     (Join-Path $packageDirectory "omawrite.exe") + '"'

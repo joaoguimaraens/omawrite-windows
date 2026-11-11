@@ -1,4 +1,4 @@
-QT += core gui widgets printsupport qml quick quickcontrols2 quickdialogs2
+QT += core gui concurrent widgets printsupport qml quick quickcontrols2 quickdialogs2
 
 unix: QT += dbus
 win32: QT += svg
@@ -7,19 +7,21 @@ CONFIG += c++17 release
 TARGET = omawrite
 TEMPLATE = app
 
-VERSION = 0.5.0
+win32: VERSION = 0.7.2
 QMAKE_TARGET_PRODUCT = OmaWrite
 QMAKE_TARGET_DESCRIPTION = OmaWrite Markdown editor
 QMAKE_TARGET_COPYRIGHT = Copyright (c) OmaWrite contributors
 
 HEADERS += \
     src/backend.h \
+    src/cli.h \
     src/markdownhighlighter.h \
     src/systemtheme.h
 
 SOURCES += \
     src/main.cpp \
     src/backend.cpp \
+    src/cli.cpp \
     src/markdownhighlighter.cpp \
     src/systemtheme.cpp
 

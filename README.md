@@ -29,8 +29,7 @@ platform-specific decisions at the operating-system boundary:
   with SHA-256 checksums for both artifacts.
 - The installer registers OmaWrite as a Markdown application, supports clean
   uninstall, and does not require administrator access in the normal case.
-- GitHub Actions rebuilds and tests the Windows package from source. The
-  Windows test suite passes 11 tests and skips one Linux-specific check.
+- GitHub Actions builds and tests the Windows package from source.
 
 The result is a release a user can evaluate immediately and a build another
 engineer can reproduce, inspect, or extend.
@@ -77,10 +76,18 @@ Install Visual Studio Build Tools 2022 with the C++ workload, then double-click
 runs the test suite, deploys the runtime, and creates a portable ZIP plus a
 Setup EXE in `dist`.
 
+Run the generated Setup EXE to install the local build, or extract its portable
+ZIP to run it directly.
+
 ## Install on Omarchy
 
 Install the `omawrite` package from the Omarchy Package Repository. Omawrite is
 installed by default in new Omarchy installations from Quattro forward.
+
+## Command line
+
+`omawrite` opens an empty document and `omawrite FILE` opens a Markdown file.
+`omawrite --help` and `omawrite --version` answer in the terminal without opening a window.
 
 ## Shortcuts
 
@@ -93,27 +100,74 @@ installed by default in new Omarchy installations from Quattro forward.
 - `F11` or `Super+F` toggles fullscreen.
 - `Ctrl+F` searches the document. Use `Enter` or `Ctrl+G` for the next match and `Shift+Enter` for the previous match.
 - `Ctrl+H` opens find and replace.
-- `Ctrl+B`, `Ctrl+I`, and `Ctrl+K` insert bold, italic, and link Markdown.
-- `Ctrl+?` shows the keyboard shortcut reference.
+- `Ctrl+B`, `Ctrl+I`, and `Ctrl+Shift+X` toggle bold, italic, and strikethrough Markdown. `Ctrl+K` inserts a link.
+- `Ctrl+=` and `Ctrl+-` change the text size, `Ctrl+0` returns to the default.
+  `Ctrl+scroll` does the same.
+- `Ctrl+Shift+C` copies the rendered document as HTML, with plain text as a fallback.
+- `Ctrl+?`, `Ctrl+/`, or `F1` shows the keyboard shortcut reference.
+- In the unsaved-changes dialog, `Alt+C`, `Alt+D`, and `Alt+S` choose Cancel,
+  Discard, and Save.
 
-Unsaved drafts are recovered after an abnormal exit. Omawrite also watches open files
-and warns before an external change can replace local work.
+Once a document has been saved to a file, edits are auto-saved to that file a
+moment after you stop typing, so `Ctrl+S` is rarely needed. Untitled drafts are
+never auto-saved — they wait for an explicit save so Omawrite never picks a file
+name for you. Unsaved drafts are recovered after an abnormal exit. Omawrite also
+watches open files and warns before an external change can replace local work;
+auto-save pauses until you reload, keep your version, or save. A recovered draft
+is never auto-saved over its file — save it to keep it.
+
+The font button in the footer picks the writing font from any installed text font,
+and Omawrite remembers the choice. IBM Plex Mono is the default.
 
 On Linux, text follows `omarchy display text size` or GNOME's
-`text-scaling-factor` and re-flows without a restart. On Windows, OmaWrite uses
-the system color scheme and the app's default text size.
+`text-scaling-factor` and re-flows without a restart. Windows starts at the
+app's default text size. On both platforms, `Ctrl+=`, `Ctrl+-`, and `Ctrl+scroll`
+adjust the size from 50% to 300%. Omawrite remembers it for new windows.
 
 ## Linux requirements
 
-- Qt 6: `qt6-base`, `qt6-declarative`, `qt6-quickcontrols2`
+- Qt 6: `qt6-base` and `qt6-declarative` (which includes Qt Quick Controls)
 - `xdg-desktop-portal` and a portal backend
 
-The iA Writer Mono font is bundled under the SIL Open Font License 1.1; see
-`fonts/OFL.txt`. The font is copyright Information Architects Inc. and based on
-IBM Plex, copyright IBM Corp.
+The bundled IBM Plex Mono font is copyright IBM Corp. Its SIL Open Font License
+1.1 is in `fonts/OFL.txt`.
 
 The Windows package dynamically links to Qt 6 under the GNU Lesser General
 Public License v3. See `THIRD-PARTY-NOTICES.md` for distribution details.
 
 Security reports are handled privately as described in
 [SECURITY.md](SECURITY.md).
+## Build and install on Linux
+
+For a local build, install the Qt requirements above, a C++17 compiler such as
+`gcc`, and `make`. The build scripts use `qmake6` (or `qmake`), and the tests use
+QtTest; both ship in `qt6-base`.
+
+```sh
+./bin/build
+./bin/test
+./build/omawrite
+```
+
+`bin/test` runs the Qt test suite with the offscreen platform, so it does not
+require an active graphical session. To open a file with the local build:
+
+```sh
+./build/omawrite path/to/document.md
+```
+
+On Arch Linux or Omarchy, install `base-devel` for the packaging tools, then
+build and install the package:
+
+```sh
+./bin/install
+```
+
+This runs the local build and `makepkg -fsi`, which installs the package through
+pacman and may ask for authentication. To build a package archive for inspection
+without installing it:
+
+```sh
+cd pkgbuild
+makepkg -f
+```
