@@ -8,4 +8,4 @@ Omawrite stores preferences such as the last save directory, font, and zoom in l
 
 ## Installation and build
 
-The Setup EXE and portable ZIP contain the application files. When the install script runs from a source checkout without a local package, it contacts GitHub to download a portable ZIP from the Windows fork and verify its checksum. The build script may download Qt and Inno Setup to compile the app. [Windows release source](https://github.com/joaoguimaraens/omawrite-windows/releases)
+The Setup EXE and portable ZIP contain the application files. When the install script runs from a source checkout without a local package, it contacts GitHub to download a portable ZIP from this repository's releases and verify its checksum. The build script may download Qt and Inno Setup to compile the app.

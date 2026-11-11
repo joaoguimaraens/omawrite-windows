@@ -4,7 +4,7 @@ Omawrite's Windows binaries are currently unsigned. A SHA-256 file lets users ch
 
 ## Release artifacts
 
-Build the portable ZIP and Setup EXE from the same public tag in `joaoguimaraens/omawrite-windows` using the Windows workflow. Publish a SHA-256 file alongside each package and preserve the artifacts produced by that build. Identify the corresponding `omacom/omawrite` version or commit in the release notes.
+Build the portable ZIP and Setup EXE from the same public tag using this repository's Windows workflow. Publish a SHA-256 file alongside each package and preserve the artifacts produced by that build. Identify the corresponding `omacom/omawrite` version or commit in the release notes.
 
 ## Future signing
 

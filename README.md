@@ -2,7 +2,7 @@
 
 Omawrite is a native Markdown editor for Windows 11 x64. It follows the system theme and is available as a portable ZIP or a per-user installer.
 
-`@joaoguimaraens` maintains the Windows port in `joaoguimaraens/omawrite-windows`. `omacom/omawrite` is the upstream project and the source for editor updates. Each Windows update identifies the upstream version or commit it is based on. [Windows fork](https://github.com/joaoguimaraens/omawrite-windows) · [Upstream Omawrite](https://github.com/omacom/omawrite)
+This fork maintains the Windows port. `omacom/omawrite` is the upstream project and the source for editor updates. Each Windows update identifies the upstream version or commit it is based on. [Upstream Omawrite](https://github.com/omacom/omawrite)
 
 ## Start on Windows
 
@@ -11,7 +11,7 @@ Omawrite is a native Markdown editor for Windows 11 x64. It follows the system t
 
 Both packages include the editor and its Qt runtime. Windows can show a reputation warning for the unsigned executables. The signing policy is in `CODE_SIGNING_POLICY.md` in the source repository.
 
-Download published Windows packages from this fork. Build locally if a release is unavailable. [Windows releases](https://github.com/joaoguimaraens/omawrite-windows/releases)
+Download published Windows packages from this repository's **Releases** page. Build locally if a release is unavailable.
 
 ## Build on Windows
 

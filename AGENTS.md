@@ -30,4 +30,4 @@ Use short imperative subjects, such as `Fix default Qt toolchain detection`. In 
 
 ## Upstream Updates
 
-`joaoguimaraens/omawrite-windows` is the Windows fork. `omacom/omawrite` is the upstream source for editor updates. Record the upstream tag or commit in update commits or pull requests and release notes. Follow the [upstream update procedure](README.md#upstream-updates).
+This repository maintains the Windows fork. `omacom/omawrite` is the upstream source for editor updates. Record the upstream tag or commit in update commits or pull requests and release notes. Follow the [upstream update procedure](README.md#upstream-updates).
