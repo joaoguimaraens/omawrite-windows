@@ -165,8 +165,11 @@ jobs:
           }
           $setup = $setups[0]
           $releaseOptions = @("--generate-notes", "--verify-tag")
-          if ($env:GITHUB_REF_NAME -match '-') {
+          $releaseTag = $env:GITHUB_REF_NAME -replace '-windows\.\d+(?=-|$)', ''
+          if ($releaseTag -match '-') {
             $releaseOptions += @("--prerelease", "--latest=false")
+          } else {
+            $releaseOptions += "--latest"
           }
           gh release create $env:GITHUB_REF_NAME `
             $zip.FullName ($zip.FullName + ".sha256") `
