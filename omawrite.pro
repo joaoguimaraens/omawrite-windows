@@ -6,7 +6,7 @@ CONFIG += c++17 release
 TARGET = omawrite
 TEMPLATE = app
 
-win32: VERSION = 0.7.2
+win32: VERSION = 0.7.5
 QMAKE_TARGET_PRODUCT = Omawrite
 QMAKE_TARGET_DESCRIPTION = Omawrite Markdown editor
 QMAKE_TARGET_COPYRIGHT = Copyright (c) Omacom
@@ -14,13 +14,15 @@ QMAKE_TARGET_COPYRIGHT = Copyright (c) Omacom
 HEADERS += \
     src/backend.h \
     src/cli.h \
-    src/markdownhighlighter.h
+    src/markdownhighlighter.h \
+    src/translator.h
 
 SOURCES += \
     src/main.cpp \
     src/backend.cpp \
     src/cli.cpp \
-    src/markdownhighlighter.cpp
+    src/markdownhighlighter.cpp \
+    src/translator.cpp
 
 RESOURCES += src/resources.qrc
 

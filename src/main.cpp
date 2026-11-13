@@ -13,8 +13,9 @@
 
 #include "backend.h"
 #include "cli.h"
+#include "translator.h"
 
-#define OMAWRITE_VERSION "0.7.2"
+#define OMAWRITE_VERSION "0.7.5"
 
 int main(int argc, char *argv[]) {
     // Answered before the application exists, so they need no display.
@@ -35,6 +36,11 @@ int main(int argc, char *argv[]) {
     app.setOrganizationDomain(QStringLiteral("omacom.io"));
 
     QQuickStyle::setStyle(QStringLiteral("Material"));
+
+    // Installed before anything is translated, and every qsTr() binding is
+    // re-evaluated if the language changes.
+    Translator translator;
+    app.installTranslator(&translator);
 
     Backend backend(&app);
     if (QStyleHints *styleHints = app.styleHints()) {
@@ -70,6 +76,9 @@ int main(int argc, char *argv[]) {
         for (const QQmlError &warning : warnings)
             qWarning().noquote() << warning.toString();
     });
+    QObject::connect(&translator, &Translator::changed, &engine, &QQmlEngine::retranslate);
+    QObject::connect(&translator, &Translator::changed, &backend, &Backend::retranslate);
+    engine.rootContext()->setContextProperty(QStringLiteral("translator"), &translator);
     engine.rootContext()->setContextProperty(QStringLiteral("backend"), &backend);
 
     engine.load(QUrl(QStringLiteral("qrc:/Main.qml")));

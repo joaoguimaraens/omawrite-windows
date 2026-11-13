@@ -37,6 +37,9 @@ The script reads the version from `omawrite.pro`, provisions Qt 6.8.3 and Inno S
 
 ## Upstream updates
 
+The current Windows source is based on upstream **v0.7.5**, commit
+`8ee488b568c1e449b767b517aa3084607a22892f`.
+
 Use your Windows fork as `origin` and `omacom/omawrite` as `upstream`. If `upstream` is missing, add it once.
 
 ```powershell
@@ -57,6 +60,15 @@ Preserve the Windows build and installer when resolving conflicts. In update com
 Keep the version metadata in `src/main.cpp`, `omawrite.pro`, and `windows/installer.iss` in sync. Open a Markdown file from the extracted ZIP and verify installation and removal with Setup on Windows. The Windows GitHub Actions workflow builds and tests both packages and generates SHA-256 files for tagged releases.
 
 Push a `v*` tag to publish the verified packages. Tags with a prerelease suffix, such as `v0.7.2-windows.1-rc.1`, are published as GitHub prereleases and do not replace the latest stable release.
+
+### 0.7.5 Windows update notes
+
+Based on `omacom/omawrite v0.7.5` (`8ee488b568c1e449b767b517aa3084607a22892f`).
+Includes upstream translations, faster opening of large documents, preservation
+of unusual spaces, and improvements to dialog keys and themed controls.
+Translations follow the Windows UI language. The Windows fork retains its
+Omawrite branding, system light/dark theme, qmake build, `--version` option,
+portable ZIP, and per-user Setup installer.
 
 ## Command line
 
@@ -85,7 +97,7 @@ Run `omawrite.exe` without arguments to open an empty document.
 - `Ctrl+=` and `Ctrl+-` change the text size, `Ctrl+0` returns to the default. `Ctrl+scroll` does the same.
 - `Ctrl+Shift+C` copies the rendered document as HTML, with plain text as a fallback.
 - `Ctrl+?`, `Ctrl+/`, or `F1` shows the keyboard shortcut reference.
-- In the unsaved-changes dialog, `Alt+C`, `Alt+D`, and `Alt+S` choose Cancel, Discard, and Save.
+- In the unsaved-changes dialog, press a button's underlined letter, with or without `Alt`, to choose it. In English, `C`, `D`, and `S` choose Cancel, Discard, and Save.
 
 Once a document has been saved to a file, edits are auto-saved to that file a moment after you stop typing, so `Ctrl+S` is rarely needed. Untitled drafts are saved when you choose a filename. Omawrite recovers unsaved drafts after an abnormal exit. When a file changes externally, auto-save pauses until you reload, keep your version, or save. Save a recovered draft explicitly to write it to disk.
 
