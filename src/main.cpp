@@ -15,7 +15,7 @@
 #include "cli.h"
 #include "translator.h"
 
-#define OMAWRITE_VERSION "0.7.5"
+#define OMAWRITE_VERSION "0.7.6"
 
 int main(int argc, char *argv[]) {
     // Answered before the application exists, so they need no display.

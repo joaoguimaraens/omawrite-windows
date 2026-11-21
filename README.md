@@ -37,8 +37,8 @@ The script reads the version from `omawrite.pro`, provisions Qt 6.8.3 and Inno S
 
 ## Upstream updates
 
-The current Windows source is based on upstream **v0.7.5**, commit
-`8ee488b568c1e449b767b517aa3084607a22892f`.
+The current Windows source is based on upstream **v0.7.6**, commit
+`9d713b90fc39e0cfa715036b9a947dfca49cc51d`.
 
 Use your Windows fork as `origin` and `omacom/omawrite` as `upstream`. If `upstream` is missing, add it once.
 
@@ -60,6 +60,16 @@ Preserve the Windows build and installer when resolving conflicts. In update com
 Keep the version metadata in `src/main.cpp`, `omawrite.pro`, and `windows/installer.iss` in sync. Open a Markdown file from the extracted ZIP and verify installation and removal with Setup on Windows. The Windows GitHub Actions workflow builds and tests both packages and generates SHA-256 files for tagged releases.
 
 Push a `v*` tag to publish the verified packages. Windows tags such as `v0.7.5-windows.1` publish a stable release and mark it as latest. Tags with a prerelease suffix, such as `v0.7.2-windows.1-rc.1`, are published as GitHub prereleases and do not replace the latest stable release.
+
+### 0.7.6 Windows update notes
+
+Based on `omacom/omawrite v0.7.6` (`9d713b90fc39e0cfa715036b9a947dfca49cc51d`).
+Opened files now start with the cursor and view at the top. Left and Right
+follow Qt's platform character-navigation shortcuts while preserving whole
+Unicode characters. The upstream regression tests run through the Windows
+qmake test target, with Qt's private GUI headers used only by the tests.
+The Windows branding, system theme, build, portable ZIP, and per-user Setup
+installer are preserved.
 
 ### 0.7.5 Windows update notes
 

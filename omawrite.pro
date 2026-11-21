@@ -6,7 +6,7 @@ CONFIG += c++17 release
 TARGET = omawrite
 TEMPLATE = app
 
-win32: VERSION = 0.7.5
+win32: VERSION = 0.7.6
 QMAKE_TARGET_PRODUCT = Omawrite
 QMAKE_TARGET_DESCRIPTION = Omawrite Markdown editor
 QMAKE_TARGET_COPYRIGHT = Copyright (c) Omacom
