@@ -55,6 +55,11 @@ git merge upstream/master
 
 Preserve the Windows build and installer when resolving conflicts. In update commits or pull requests and in release notes, identify the upstream tag or commit, such as `omacom/omawrite v0.7.2`, and describe the Windows changes.
 
+Compare `pkgbuild/omawrite.svg` from the upstream tag with `windows/omawrite.svg`.
+When the artwork changes, sync the SVG used by the editor window and regenerate
+`windows/omawrite.ico` for the executable and Setup. Verify the icon in both
+packages, including the installed application's Windows shortcuts.
+
 ## Release verification
 
 Keep the version metadata in `src/main.cpp`, `omawrite.pro`, and `windows/installer.iss` in sync. Open a Markdown file from the extracted ZIP and verify installation and removal with Setup on Windows. The Windows GitHub Actions workflow builds and tests both packages and generates SHA-256 files for tagged releases.
@@ -64,6 +69,8 @@ Push a `v*` tag to publish the verified packages. Windows tags such as `v0.7.5-w
 ### 0.7.6 Windows update notes
 
 Based on `omacom/omawrite v0.7.6` (`9d713b90fc39e0cfa715036b9a947dfca49cc51d`).
+`v0.7.6-windows.2` brings the upstream icon (`5cd5937`) to the editor window,
+executable, and installer.
 Opened files now start with the cursor and view at the top. Left and Right
 follow Qt's platform character-navigation shortcuts while preserving whole
 Unicode characters. The upstream regression tests run through the Windows
